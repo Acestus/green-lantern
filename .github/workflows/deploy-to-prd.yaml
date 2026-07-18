@@ -1,0 +1,542 @@
+name: Deploy to prd
+
+on:
+  workflow_dispatch:
+    inputs:
+      subscription:
+        description: Select Azure subscription
+        required: false
+        type: choice
+        default: Corp-520-ApplicationDevelopment
+        options:
+          - Corp-520-ApplicationDevelopment
+          - Corp-530-EnterpriseDataManagement
+          - Corp-710-Analytics
+          - Corp-750-HumanResources
+          - Corp-100-Marketing
+      projectName:
+        description: Project short code (2-8 lowercase letters/numbers)
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ENVIRONMENT: prd
+  REGION_CODE: usw2
+  INSTANCE_NUMBER: "001"
+  DEFAULT_SUBSCRIPTION: Corp-520-ApplicationDevelopment
+  SWA_APP_LOCATION: swa/hello-portal
+
+concurrency:
+  group: template-functions-prd-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    environment: prd
+    outputs:
+      project: ${{ steps.cfg.outputs.project }}
+      subscription: ${{ steps.cfg.outputs.subscription }}
+      subscription_id: ${{ steps.sub.outputs.id }}
+      resource_group: ${{ steps.infra.outputs.resource_group }}
+
+    steps:
+      - name: Checkout template repo
+        uses: actions/checkout@v5
+
+      - name: Resolve deployment inputs
+        id: cfg
+        shell: pwsh
+        run: |
+          $repoName = "${{ github.event.repository.name }}".ToLowerInvariant()
+          $derivedProject = ($repoName -replace '[^a-z0-9]', '')
+          if ($derivedProject.Length -gt 8) { $derivedProject = $derivedProject.Substring(0, 8) }
+
+          $project = "${{ inputs.projectName }}".Trim().ToLowerInvariant()
+          if ([string]::IsNullOrWhiteSpace($project)) { $project = $derivedProject }
+          if ($project -notmatch '^[a-z0-9]{2,8}$') {
+            throw "projectName must resolve to ^[a-z0-9]{2,8}$ (got '$project')"
+          }
+
+          $subscription = "${{ inputs.subscription }}".Trim()
+          if ([string]::IsNullOrWhiteSpace($subscription)) {
+            $subscription = "${{ vars.DEPLOY_SUBSCRIPTION }}".Trim()
+          }
+          if ([string]::IsNullOrWhiteSpace($subscription)) {
+            $subscription = "${{ env.DEFAULT_SUBSCRIPTION }}"
+          }
+
+          "project=$project" >> $env:GITHUB_OUTPUT
+          "subscription=$subscription" >> $env:GITHUB_OUTPUT
+
+      - name: Resolve subscription ID
+        id: sub
+        shell: pwsh
+        run: |
+          switch ("${{ steps.cfg.outputs.subscription }}") {
+            "Corp-520-ApplicationDevelopment" { $id = "00000000-0000-0000-0000-000000000000" }
+            "Corp-530-EnterpriseDataManagement" { $id = "00000000-0000-0000-0000-000000000000" }
+            "Corp-710-Analytics" { $id = "00000000-0000-0000-0000-000000000000" }
+            "Corp-750-HumanResources" { $id = "00000000-0000-0000-0000-000000000000" }
+            "Corp-100-Marketing" { $id = "00000000-0000-0000-0000-000000000000" }
+            default { throw "Unsupported subscription: ${{ steps.cfg.outputs.subscription }}" }
+          }
+          "id=$id" >> $env:GITHUB_OUTPUT
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.UMI_SKPMGT_PRD_USW2_CTL }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ steps.sub.outputs.id }}
+
+      - name: Prepare deployment parameters
+        id: infra
+        shell: pwsh
+        run: |
+          $project = "${{ steps.cfg.outputs.project }}"
+          $resourceGroupName = "rg-$project-prd"
+          $paramFilePath = "infrastructure/main.prd.generated.bicepparam"
+
+          @(
+            "using './main.bicep'"
+            ""
+            "param projectName = '$project'"
+            "param environment = 'prd'"
+            "param region = '${{ env.REGION_CODE }}'"
+            "param instanceNumber = '${{ env.INSTANCE_NUMBER }}'"
+            "param tags = {"
+            "  ManagedBy: 'https://github.com/${{ github.repository }}'"
+            "  CreatedBy: '${{ github.actor }}'"
+            "  Environment: 'Production'"
+            "  Subscription: '${{ steps.cfg.outputs.subscription }}'"
+            "  Project: 'Azure Functions Template'"
+            "  CAFName: '$project-prd-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}'"
+            "}"
+          ) | Set-Content -Path $paramFilePath -Encoding utf8
+
+          "resource_group=$resourceGroupName" >> $env:GITHUB_OUTPUT
+          "param_file=$paramFilePath" >> $env:GITHUB_OUTPUT
+
+      - name: Deploy infrastructure
+        shell: pwsh
+        run: |
+          $rgName = "${{ steps.infra.outputs.resource_group }}"
+          $exists = (az group exists --name $rgName).Trim().ToLowerInvariant()
+          if ($exists -ne "true") {
+            az group create --name $rgName --location westus2 --output none
+          }
+          az deployment group create `
+            --resource-group $rgName `
+            --template-file infrastructure/main.bicep `
+            --parameters "${{ steps.infra.outputs.param_file }}"
+
+      - name: Troubleshooting hints (on failure)
+        if: failure()
+        shell: bash
+        run: |
+          echo "❌ Infra stage failed."
+          echo "   Likely causes:"
+          echo "     • OIDC federated credential mismatch for environment:prd"
+          echo "     • Missing environment variables (UMI_SKPMGT_PRD_USW2_CTL, AZURE_TENANT_ID)"
+          echo "     • Bicep parameter mismatch for projectName/subscription"
+          echo "   Try:"
+          echo "     • Verify env vars: gh variable list -R Acestus/template-functions -e prd"
+          echo "     • Validate deployment: az deployment group what-if --resource-group rg-${{ steps.cfg.outputs.project }}-prd --template-file infrastructure/main.bicep --parameters ${{ steps.infra.outputs.param_file }}"
+
+  upload-storage-reports:
+    runs-on: ubuntu-latest
+    environment: prd
+    needs: deploy-infra
+
+    steps:
+      - name: Checkout template repo
+        uses: actions/checkout@v5
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.UMI_SKPMGT_PRD_USW2_CTL }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+
+      - name: Upload storage-hosted HTML reports
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+            project="${{ needs.deploy-infra.outputs.project }}"
+            project_title="${project^}"
+            env_name="${{ env.ENVIRONMENT }}"
+            region="${{ env.REGION_CODE }}"
+            instance="${{ env.INSTANCE_NUMBER }}"
+            storage_account="st${project}${env_name}${region}${instance}"
+            swa_name="swa-${project}-${env_name}-${region}-${instance}"
+            web_container='$web'
+            rg="${{ needs.deploy-infra.outputs.resource_group }}"
+
+            account_key=$(az storage account keys list \
+              --resource-group "$rg" \
+              --account-name "$storage_account" \
+              --query "[0].value" -o tsv)
+
+            if [ -z "$account_key" ]; then
+              echo "❌ Failed to resolve storage account key for $storage_account" >&2
+              exit 1
+            fi
+
+            az storage blob service-properties update \
+              --account-name "$storage_account" \
+              --account-key "$account_key" \
+              --static-website \
+              --index-document index.html \
+              --404-document architecture-report.html \
+              --output none
+
+            az storage container create \
+              --name "$web_container" \
+              --account-name "$storage_account" \
+              --account-key "$account_key" \
+              --output none
+
+            storage_web_base_url=$(az storage account show \
+              --name "$storage_account" \
+              --resource-group "$rg" \
+              --query "primaryEndpoints.web" -o tsv | sed 's:/*$::')
+
+            swa_hostname=$(az staticwebapp show \
+              --name "$swa_name" \
+              --resource-group "$rg" \
+              --query "defaultHostname" -o tsv)
+            swa_base_url="https://${swa_hostname}"
+
+            tmp_reports_dir="$(mktemp -d)"
+            cp -R storage-reports/. "$tmp_reports_dir/"
+            find "$tmp_reports_dir" -type f -name '*.html' -print0 | while IFS= read -r -d '' file; do
+              sed -i \
+                -e "s#__PROJECT_NAME__#${project}#g" \
+                -e "s#__PROJECT_TITLE__#${project_title}#g" \
+                -e "s#__SWA_BASE_URL__#${swa_base_url}#g" \
+                -e "s#__STORAGE_WEB_BASE_URL__#${storage_web_base_url}#g" \
+                "$file"
+            done
+
+            az storage blob upload-batch \
+              --account-name "$storage_account" \
+              --account-key "$account_key" \
+              --destination "$web_container" \
+              --source "$tmp_reports_dir" \
+              --overwrite true \
+              --output table
+
+  sync-appinsights-key:
+    runs-on: ubuntu-latest
+    environment: prd
+    needs: deploy-infra
+
+    steps:
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.UMI_SKPMGT_PRD_USW2_CTL }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+
+      - name: Ensure App Insights API key and function setting
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+            rg="${{ needs.deploy-infra.outputs.resource_group }}"
+            appi_name="appi-${{ needs.deploy-infra.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+            function_name="func-${{ needs.deploy-infra.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+
+            api_key=$(az functionapp config appsettings list \
+              --name "$function_name" \
+              --resource-group "$rg" \
+              --query "[?name=='APPINSIGHTS_API_KEY'] | [0].value" -o tsv)
+
+            if [ "$api_key" = "None" ]; then
+              api_key=""
+            fi
+
+            if [ -z "$api_key" ]; then
+              key_name="hello-portal-query-key-${GITHUB_RUN_ID:-manual}-$(date +%s)"
+              api_key=$(az monitor app-insights api-key create \
+                --resource-group "$rg" \
+                --app "$appi_name" \
+                --api-key "$key_name" \
+                --read-properties ReadTelemetry \
+                --query apiKey -o tsv)
+            fi
+
+            app_id=$(az monitor app-insights component show \
+              --resource-group "$rg" \
+              --app "$appi_name" \
+              --query appId -o tsv)
+
+            az functionapp config appsettings set \
+              --name "$function_name" \
+              --resource-group "$rg" \
+              --settings "APPINSIGHTS_API_KEY=$api_key" "APPINSIGHTS_APP_ID=$app_id" \
+              --output none
+
+  deploy-function:
+    runs-on: ubuntu-latest
+    environment: prd
+    needs: deploy-infra
+    outputs:
+      function_hostname: ${{ steps.function-host.outputs.hostname }}
+
+    steps:
+      - name: Checkout template repo
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build Hello World
+        shell: pwsh
+        run: |
+          dotnet publish ./hello-world/HelloWorld.csproj --configuration Release --output ./hello-world/publish
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.UMI_SKPMGT_PRD_USW2_CTL }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+
+      - name: Deploy Hello World code
+        uses: Azure/functions-action@v1
+        with:
+          app-name: func-${{ needs.deploy-infra.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}
+          package: ./hello-world/publish
+
+      - name: Resolve function hostname
+        id: function-host
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+            HOSTNAME=$(az functionapp show \
+              --name "func-${{ needs.deploy-infra.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
+              --resource-group "${{ needs.deploy-infra.outputs.resource_group }}" \
+              --query defaultHostName -o tsv)
+            echo "hostname=$HOSTNAME" >> "$GITHUB_OUTPUT"
+
+  deploy-swa:
+    runs-on: ubuntu-latest
+    environment: prd
+    needs: deploy-infra
+    outputs:
+      swa_hostname: ${{ steps.swa-host.outputs.hostname }}
+
+    steps:
+      - name: Checkout template repo
+        uses: actions/checkout@v5
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.UMI_SKPMGT_PRD_USW2_CTL }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+
+      - name: Write SWA runtime config
+        shell: pwsh
+        run: |
+          $project = "${{ needs.deploy-infra.outputs.project }}"
+          $storageAccount = "st${project}${{ env.ENVIRONMENT }}${{ env.REGION_CODE }}${{ env.INSTANCE_NUMBER }}"
+          $resourceGroup = "${{ needs.deploy-infra.outputs.resource_group }}"
+          $apiBaseUrl = "https://func-${project}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}.azurewebsites.net/api"
+          $storageWebBaseUrl = (az storage account show --name $storageAccount --resource-group $resourceGroup --query "primaryEndpoints.web" -o tsv).TrimEnd('/')
+          $swaName = "swa-${project}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+          $swaHostname = az staticwebapp show --name $swaName --resource-group $resourceGroup --query "defaultHostname" -o tsv
+          $swaBaseUrl = "https://$swaHostname"
+
+          @(
+            "window.HELLO_PORTAL_CONFIG = {"
+            "  projectName: '$project',"
+            "  apiBaseUrl: '$apiBaseUrl',"
+            "  storageWebBaseUrl: '$storageWebBaseUrl',"
+            "  swaBaseUrl: '$swaBaseUrl'"
+            "};"
+          ) | Set-Content -Path "${{ env.SWA_APP_LOCATION }}/config.js" -Encoding utf8
+
+      - name: Get SWA deployment token
+        id: swa-token
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+            swa_name="swa-${{ needs.deploy-infra.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+            token=$(az staticwebapp secrets list \
+              --name "$swa_name" \
+              --resource-group "${{ needs.deploy-infra.outputs.resource_group }}" \
+              --query properties.apiKey -o tsv)
+
+            if [ -z "$token" ]; then
+              echo "❌ Could not resolve SWA deployment token for $swa_name" >&2
+              echo "   Likely causes:" >&2
+              echo "     • Static Web App was not created in this deployment" >&2
+              echo "     • Resource group or subscription does not match deployment target" >&2
+              echo "   Try:" >&2
+              echo "     • az staticwebapp list --resource-group \"${{ needs.deploy-infra.outputs.resource_group }}\" -o table" >&2
+              exit 1
+            fi
+
+            echo "::add-mask::$token"
+            echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build SWA assets (Bun + Chart.js)
+        shell: bash
+        working-directory: ${{ env.SWA_APP_LOCATION }}
+        run: |
+          bun install
+          bun run build
+
+      - name: Deploy SWA pages
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: ${{ env.SWA_APP_LOCATION }}
+          skip_app_build: true
+
+      - name: Resolve SWA hostname
+        id: swa-host
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            set -euo pipefail
+            HOSTNAME=$(az staticwebapp show \
+              --name "swa-${{ needs.deploy-infra.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
+              --resource-group "${{ needs.deploy-infra.outputs.resource_group }}" \
+              --query defaultHostname -o tsv)
+            echo "hostname=$HOSTNAME" >> "$GITHUB_OUTPUT"
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    environment: prd
+    needs:
+      - deploy-infra
+      - deploy-function
+      - deploy-swa
+      - upload-storage-reports
+      - sync-appinsights-key
+
+    steps:
+      - name: Smoke test function health endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://${{ needs.deploy-function.outputs.function_hostname }}/api/health"
+          ATTEMPTS=12
+          DELAY=10
+          for i in $(seq 1 $ATTEMPTS); do
+            CODE=$(curl -s -o /tmp/function-health.json -w "%{http_code}" "$URL")
+            if [ "$CODE" = "200" ] && grep -Eiq '"status"[[:space:]]*:[[:space:]]*"ok"' /tmp/function-health.json; then
+              echo "✅ Function smoke test passed."
+              exit 0
+            fi
+            echo "Waiting for function health (${i}/${ATTEMPTS}), last status=$CODE..."
+            sleep "$DELAY"
+          done
+          echo "❌ Function smoke test failed at $URL"
+          exit 1
+
+      - name: Smoke test SWA endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://${{ needs.deploy-swa.outputs.swa_hostname }}/storage-reports.html"
+          ATTEMPTS=12
+          DELAY=10
+          for i in $(seq 1 $ATTEMPTS); do
+            CODE=$(curl -Ls -o /tmp/swa-page.html -w "%{http_code}" "$URL")
+            if [ "$CODE" = "200" ] && grep -Eiq 'Storage-hosted HTML Reports' /tmp/swa-page.html; then
+              echo "✅ SWA smoke test passed."
+              exit 0
+            fi
+            if [ "$CODE" = "403" ]; then
+              echo "✅ SWA endpoint is reachable but access-restricted from this runner (HTTP 403)."
+              exit 0
+            fi
+            echo "Waiting for SWA page (${i}/${ATTEMPTS}), last status=$CODE..."
+            sleep "$DELAY"
+          done
+          echo "❌ SWA smoke test failed at $URL"
+          exit 1
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.UMI_SKPMGT_PRD_USW2_CTL }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+
+      - name: Publish deployment summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          rg="${{ needs.deploy-infra.outputs.resource_group }}"
+          project="${{ needs.deploy-infra.outputs.project }}"
+          storage_account="st${project}${{ env.ENVIRONMENT }}${{ env.REGION_CODE }}${{ env.INSTANCE_NUMBER }}"
+          function_hostname="${{ needs.deploy-function.outputs.function_hostname }}"
+          swa_hostname="${{ needs.deploy-swa.outputs.swa_hostname }}"
+          storage_web_url=$(az storage account show --name "$storage_account" --resource-group "$rg" --query "primaryEndpoints.web" -o tsv)
+
+          {
+            echo "## Deployment summary"
+            echo ""
+            echo "- **Resource group:** \`$rg\`"
+            echo "- **Static Web App URL:** https://$swa_hostname"
+            echo "- **Storage static website URL:** $storage_web_url"
+            echo "- **Function health endpoint:** https://$function_hostname/api/health"
+            echo ""
+            echo '```bash'
+            echo "curl -fsS https://$function_hostname/api/health"
+            echo '```'
+            echo ""
+            echo "### Resources in $rg"
+            echo ""
+            echo "| Name | Type | Location |"
+            echo "|---|---|---|"
+            az resource list \
+              --resource-group "$rg" \
+              --query "[].{name:name,type:type,location:location}" \
+              -o tsv | while IFS=$'\t' read -r name type location; do
+                echo "| $name | $type | $location |"
+              done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Troubleshooting hints (on failure)
+        if: failure()
+        shell: bash
+        run: |
+          echo "❌ Post-deploy smoke test failed."
+          echo "   Likely causes:"
+          echo "     • Function deployment not fully warmed up"
+          echo "     • SWA deployment not yet propagated"
+          echo "     • Route/content changed and smoke assertions no longer match"
+          echo "   Try:"
+          echo "     • Check function health manually: curl -i https://${{ needs.deploy-function.outputs.function_hostname }}/api/health"
+          echo "     • Check SWA manually: curl -i https://${{ needs.deploy-swa.outputs.swa_hostname }}/storage-reports.html"

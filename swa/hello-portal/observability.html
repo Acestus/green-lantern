@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Insights</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%92%BC%3C/text%3E%3C/svg%3E">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #faf9f8;
+      color: #323130;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      color: #0078d4;
+      border-bottom: 3px solid #0078d4;
+      padding-bottom: 8px;
+    }
+    .nav { margin: 14px 0 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .nav a { color: #0078d4; text-decoration: none; font-weight: 600; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .panel {
+      background: #fff;
+      border: 1px solid #d2d0ce;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .metric {
+      font-size: 30px;
+      font-weight: 700;
+      color: #106ebe;
+    }
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .chart-wrap {
+      min-height: 280px;
+    }
+    .error { color: #a80000; font-weight: 700; }
+    .hidden { display: none; }
+    .table-wrap {
+      margin-top: 14px;
+      max-height: 220px;
+      overflow: auto;
+      border: 1px solid #edebe9;
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: #fff;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #edebe9;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #f3f2f1;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+      .charts { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>App Insights</h1>
+    <div class="nav">
+      <a href="/index.html">Home</a>
+      <a href="/data.html">Blob/Queue/Table Demo</a>
+      <a id="storageSiteLink" href="#" target="_blank" rel="noopener noreferrer">Storage Website</a>
+    </div>
+    <div id="status">Loading live App Insights data from Function API...</div>
+    <div class="grid">
+      <div class="panel">
+        <div>Requests (5m)</div>
+        <div class="metric" id="requestsValue">0</div>
+      </div>
+      <div class="panel">
+        <div>Errors (5m)</div>
+        <div class="metric" id="errorsValue">0</div>
+      </div>
+      <div class="panel">
+        <div>P95 Latency</div>
+        <div class="metric" id="latencyValue">0ms</div>
+      </div>
+    </div>
+    <div class="charts">
+      <div class="panel">
+        <div style="margin-bottom:10px; color:#605e5c;">Application Insights requests/errors trend</div>
+        <div class="chart-wrap"><canvas id="appInsightsTrendChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div style="margin-bottom:10px; color:#605e5c;">Application Insights latency trend</div>
+        <div class="chart-wrap"><canvas id="appInsightsLatencyChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:14px;">
+      <div style="margin-bottom:10px; color:#605e5c;">Static Web App source signals</div>
+      <div id="swaHost">hostname: n/a</div>
+      <div id="swaChecked">checkedAtUtc: n/a</div>
+      <div id="swaDate">responseDateHeader: n/a</div>
+      <div id="swaRef">xAzureRefHeader: n/a</div>
+      <div id="swaEtag">etagHeader: n/a</div>
+    </div>
+    <div class="panel" style="margin-top:14px;">
+      <div style="margin-bottom:10px; color:#605e5c;">Function executions</div>
+      <div class="table-wrap"><table><thead><tr><th>timestamp</th><th>name</th><th>resultCode</th><th>operation_Id</th></tr></thead><tbody id="functionExecutionsRows"></tbody></table></div>
+    </div>
+    <div class="panel" style="margin-top:14px;">
+      <div style="margin-bottom:10px; color:#605e5c;">Function traces</div>
+      <div class="table-wrap"><table><thead><tr><th>timestamp</th><th>severityLevel</th><th>message</th></tr></thead><tbody id="functionTracesRows"></tbody></table></div>
+    </div>
+    <div class="panel hidden" id="swaExecutionsPanel" style="margin-top:14px;">
+      <div style="margin-bottom:10px; color:#605e5c;">SWA executions</div>
+      <div class="table-wrap"><table><thead><tr><th>timestamp</th><th>name</th><th>url</th><th>operation_Id</th></tr></thead><tbody id="swaExecutionsRows"></tbody></table></div>
+    </div>
+    <div class="panel hidden" id="swaTracesPanel" style="margin-top:14px;">
+      <div style="margin-bottom:10px; color:#605e5c;">SWA traces</div>
+      <div class="table-wrap"><table><thead><tr><th>timestamp</th><th>severityLevel</th><th>message</th></tr></thead><tbody id="swaTracesRows"></tbody></table></div>
+    </div>
+    <div class="panel hidden" id="correlationsPanel" style="margin-top:14px;">
+      <div style="margin-bottom:10px; color:#605e5c;">Correlations (SWA call -> Function trace)</div>
+      <div class="table-wrap"><table><thead><tr><th>correlationId</th><th>apiPath</th><th>swaTimestamp</th><th>functionTimestamp</th></tr></thead><tbody id="correlationRows"></tbody></table></div>
+    </div>
+  </div>
+  <script src="https://js.monitor.azure.com/scripts/b/ai.2.min.js"></script>
+  <script src="./config.js"></script>
+  <script>
+    (function () {
+      const cfg = window.HELLO_PORTAL_CONFIG || {};
+      const storageWebBaseUrl = cfg.storageWebBaseUrl || "#";
+      const storageLink = document.getElementById("storageSiteLink");
+      if (storageLink) {
+        storageLink.href = storageWebBaseUrl;
+      }
+    })();
+  </script>
+  <script type="module" src="./assets/observability.js"></script>
+</body>
+</html>

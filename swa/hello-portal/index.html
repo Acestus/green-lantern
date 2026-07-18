@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Portal</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%92%BC%3C/text%3E%3C/svg%3E">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #faf9f8;
+      color: #323130;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      color: #0078d4;
+      border-bottom: 3px solid #0078d4;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .subtitle {
+      color: #605e5c;
+      margin-bottom: 18px;
+    }
+    .flow {
+      background: #e1f5fe;
+      border-left: 5px solid #0078d4;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 0 0 16px;
+    }
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .nav a {
+      text-decoration: none;
+      background: #0078d4;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #d2d0ce;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .card h3 {
+      margin-top: 0;
+      color: #106ebe;
+    }
+    .meta {
+      margin-top: 8px;
+      color: #605e5c;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .error {
+      color: #a80000;
+      font-weight: 700;
+    }
+    @media (max-width: 768px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1 id="portalTitle">Project Static Web App</h1>
+    <p class="subtitle">This portal is published by the deploy-to-dev workflow.</p>
+
+    <div class="nav">
+      <a href="/index.html">Home</a>
+      <a href="/data.html">Blob/Queue/Table Demo</a>
+      <a href="/observability.html">App Insights</a>
+      <a id="storageSiteLink" href="#" target="_blank" rel="noopener noreferrer">Storage Website</a>
+    </div>
+
+    <div class="flow">
+      <strong>Flow:</strong> Start with <em>Blob/Queue/Table Demo</em>, check <em>App Insights</em>, then open the static reports directly from <em>Storage Website</em>.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Hello World API</h3>
+        <p>Use the Hello function app for simple HTTP validation and health checks.</p>
+        <div class="meta" id="helloFreshness">Loading source timestamps...</div>
+      </div>
+      <div class="card">
+        <h3>Static Web App</h3>
+        <p>This portal is deployed to the SWA resource in the same deterministic workflow.</p>
+      </div>
+      <div class="card">
+        <h3>Storage + UMI</h3>
+        <p>Infrastructure includes storage and a data-plane UMI for managed access patterns.</p>
+      </div>
+    </div>
+  </div>
+  <script src="./config.js"></script>
+  <script>
+    (function () {
+      const cfg = window.HELLO_PORTAL_CONFIG || {};
+      const projectName = (cfg.projectName || "project").toLowerCase();
+      const projectTitle = projectName.charAt(0).toUpperCase() + projectName.slice(1);
+      const storageWebBaseUrl = cfg.storageWebBaseUrl || "#";
+
+      document.title = `${projectTitle} Portal`;
+
+      const portalTitle = document.getElementById("portalTitle");
+      if (portalTitle) {
+        portalTitle.textContent = `${projectTitle} Static Web App`;
+      }
+
+      const storageLink = document.getElementById("storageSiteLink");
+      if (storageLink) {
+        storageLink.href = storageWebBaseUrl;
+      }
+    })();
+  </script>
+  <script>
+    async function loadFreshness() {
+      const target = document.getElementById("helloFreshness");
+      const apiBase = window.HELLO_PORTAL_CONFIG && window.HELLO_PORTAL_CONFIG.apiBaseUrl;
+      if (!apiBase) {
+        target.className = "meta error";
+        target.textContent = "Missing HELLO_PORTAL_CONFIG.apiBaseUrl";
+        return;
+      }
+
+      try {
+        const [storageResp, appiResp] = await Promise.all([
+          fetch(`${apiBase}/storage/summary`),
+          fetch(`${apiBase}/observability/appinsights`)
+        ]);
+
+        if (!storageResp.ok || !appiResp.ok) {
+          throw new Error(`storage=${storageResp.status}, appInsights=${appiResp.status}`);
+        }
+
+        const storage = await storageResp.json();
+        const appi = await appiResp.json();
+        const tableTs = storage.sourceTimestamps && storage.sourceTimestamps.tableLastEntityTimestampUtc
+          ? storage.sourceTimestamps.tableLastEntityTimestampUtc
+          : "n/a";
+        const appiTs = appi.latestSourceTimestampUtc || "n/a";
+        target.textContent = `storage source timestamp=${tableTs}; app insights source timestamp=${appiTs}`;
+      } catch (error) {
+        target.className = "meta error";
+        target.textContent = `Failed to load source timestamps: ${error.message}`;
+      }
+    }
+
+    loadFreshness();
+  </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture Overview</title>
+  <style>
+    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; max-width: 1200px; margin: 0 auto; padding: 24px; background: #faf9f8; color: #323130; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 3px solid #0078d4; padding-bottom: 10px; }
+    h2 { color: #106ebe; border-left: 4px solid #0078d4; padding-left: 15px; margin-top: 24px; }
+    .executive-summary { background: #e1f5fe; border-left: 5px solid #0078d4; border-radius: 8px; padding: 14px; margin: 14px 0; }
+    .principle-box { background: #f3f2f1; border: 1px solid #d2d0ce; border-radius: 8px; padding: 14px; margin: 14px 0; }
+    .metric-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+    .metric-card { background: #fff; border: 1px solid #d2d0ce; border-bottom: 4px solid #0078d4; border-radius: 8px; padding: 14px; text-align: center; }
+    .metric-card .number { font-size: 26px; font-weight: 700; color: #106ebe; }
+    .metric-card .label { color: #605e5c; font-size: 13px; }
+    .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .chart-card { background: #fff; border: 1px solid #d2d0ce; border-radius: 8px; padding: 12px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    th, td { border: 1px solid #d2d0ce; padding: 10px; text-align: left; }
+    th { background: #0078d4; color: #fff; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    @media (max-width: 768px) { .chart-grid, .metric-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>__PROJECT_TITLE__ Platform Architecture — .NET Function + SWA + Storage</h1>
+
+  <div class="executive-summary">
+    <strong>Purpose:</strong> Present the end-to-end architecture for the __PROJECT_TITLE__ workload in a professional summary format.
+    <br><br>
+    <strong>Key message:</strong> A .NET Azure Function on Flex Consumption writes platform data to Blob, Queue, and Table storage. A vanilla TypeScript Static Web App reads through the API layer, while a user-managed identity secures data-plane access.
+  </div>
+
+  <div class="metric-row">
+    <div class="metric-card">
+      <div class="number">1</div>
+      <div class="label">Azure Function App (.NET, Flex Consumption)</div>
+    </div>
+    <div class="metric-card">
+      <div class="number">3</div>
+      <div class="label">Storage Services (Blob, Queue, Table)</div>
+    </div>
+    <div class="metric-card">
+      <div class="number">1</div>
+      <div class="label">Data-Plane UMI</div>
+    </div>
+  </div>
+
+  <h2>1. Logical Architecture</h2>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Architecture Flow</h3>
+      <svg viewBox="0 0 560 230" role="img" aria-label="Architecture flow diagram">
+        <rect x="20" y="30" width="140" height="70" rx="8" fill="#e1f5fe" stroke="#0078d4"></rect>
+        <text x="34" y="58" font-size="12">Static Web App</text>
+        <text x="34" y="76" font-size="11">Vanilla TypeScript</text>
+        <rect x="210" y="30" width="160" height="70" rx="8" fill="#fff4e6" stroke="#ca5010"></rect>
+        <text x="224" y="58" font-size="12">API Layer</text>
+        <text x="224" y="76" font-size="11">.NET Azure Function</text>
+        <rect x="420" y="20" width="120" height="45" rx="8" fill="#e8f5e8" stroke="#107c10"></rect>
+        <text x="436" y="47" font-size="11">Blob</text>
+        <rect x="420" y="78" width="120" height="45" rx="8" fill="#e8f5e8" stroke="#107c10"></rect>
+        <text x="436" y="105" font-size="11">Queue</text>
+        <rect x="420" y="136" width="120" height="45" rx="8" fill="#e8f5e8" stroke="#107c10"></rect>
+        <text x="436" y="163" font-size="11">Table</text>
+        <rect x="210" y="140" width="160" height="50" rx="8" fill="#ede9fe" stroke="#5c2d91"></rect>
+        <text x="224" y="170" font-size="11">UMI (data-plane)</text>
+        <line x1="160" y1="65" x2="210" y2="65" stroke="#605e5c" stroke-width="2"></line>
+        <line x1="370" y1="65" x2="420" y2="45" stroke="#605e5c" stroke-width="2"></line>
+        <line x1="370" y1="65" x2="420" y2="100" stroke="#605e5c" stroke-width="2"></line>
+        <line x1="370" y1="65" x2="420" y2="160" stroke="#605e5c" stroke-width="2"></line>
+        <line x1="290" y1="140" x2="290" y2="100" stroke="#5c2d91" stroke-width="2"></line>
+      </svg>
+    </div>
+    <div class="chart-card">
+      <h3>Platform Composition</h3>
+      <svg viewBox="0 0 300 230" role="img" aria-label="Architecture pie and bar charts">
+        <text x="18" y="20" font-size="12">Workload split (pie)</text>
+        <circle cx="80" cy="95" r="55" fill="#f3f2f1"></circle>
+        <path d="M80,95 L80,40 A55,55 0 0,1 130,120 z" fill="#0078d4"></path>
+        <path d="M80,95 L130,120 A55,55 0 0,1 45,140 z" fill="#107c10"></path>
+        <path d="M80,95 L45,140 A55,55 0 0,1 80,40 z" fill="#ca5010"></path>
+        <text x="160" y="70" font-size="11">API 40%</text>
+        <text x="160" y="90" font-size="11">Storage 35%</text>
+        <text x="160" y="110" font-size="11">SWA 25%</text>
+        <text x="18" y="165" font-size="12">Request profile (bar)</text>
+        <rect x="30" y="178" width="28" height="38" fill="#0078d4"></rect>
+        <rect x="80" y="168" width="28" height="48" fill="#107c10"></rect>
+        <rect x="130" y="184" width="28" height="32" fill="#ca5010"></rect>
+        <text x="24" y="228" font-size="10">hello</text>
+        <text x="72" y="228" font-size="10">storage</text>
+        <text x="124" y="228" font-size="10">obs</text>
+      </svg>
+    </div>
+  </div>
+
+  <h2>2. Component Responsibilities</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Technology</th>
+        <th>Primary Responsibility</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Presentation</td>
+        <td>Azure Static Web App (vanilla TypeScript)</td>
+        <td>Render charts/tables and call API endpoints for storage and observability data.</td>
+      </tr>
+      <tr>
+        <td>API</td>
+        <td>.NET Azure Function (Flex Consumption)</td>
+        <td>Serve business endpoints and perform read/write operations to storage services.</td>
+      </tr>
+      <tr>
+        <td>Data</td>
+        <td>Azure Storage (Blob/Queue/Table)</td>
+        <td>Persist sample artifacts, message events, and audit records.</td>
+      </tr>
+      <tr>
+        <td>Identity</td>
+        <td>User-Managed Identity (data-plane)</td>
+        <td>Provide credential-free data access with least-privilege access boundaries.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Architectural Principles</h2>
+  <div class="principle-box">
+    <strong>API-first rendering:</strong> the SWA reads through function APIs instead of directly embedding storage credentials.<br>
+    <strong>Cost-aware hosting:</strong> Flex Consumption keeps serverless economics for non-constant traffic.<br>
+    <strong>Identity-based access:</strong> UMI is the standard for secure service-to-service access.
+  </div>
+
+  <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #d2d0ce; color: #a19f9d; font-size: 12px;">
+    <p>Architecture Overview — Prepared July 2026</p>
+  </div>
+</body>
+</html>

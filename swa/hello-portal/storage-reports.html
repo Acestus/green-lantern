@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage Reports</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%92%BC%3C/text%3E%3C/svg%3E">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #faf9f8;
+      color: #323130;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      color: #0078d4;
+      border-bottom: 3px solid #0078d4;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .nav {
+      margin-bottom: 18px;
+    }
+    .nav a {
+      color: #0078d4;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .report-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #d2d0ce;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .card h3 {
+      margin-top: 0;
+      color: #106ebe;
+      margin-bottom: 8px;
+    }
+    .card a {
+      text-decoration: none;
+      color: #fff;
+      background: #0078d4;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .meta {
+      color: #605e5c;
+      font-size: 13px;
+      margin: 6px 0 12px;
+    }
+    .error {
+      color: #a80000;
+      font-weight: 700;
+    }
+    .site-link {
+      background: #e1f5fe;
+      border-left: 5px solid #0078d4;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .site-link a {
+      color: #005a9e;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    @media (max-width: 768px) {
+      .report-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Storage-hosted HTML Reports</h1>
+    <div class="nav">
+      <a href="/index.html">Home</a> |
+      <a href="/data.html">Blob/Queue/Table Demo</a> |
+      <a href="/observability.html">App Insights</a> |
+      <a id="storageSiteNavLink" href="#" target="_blank" rel="noopener noreferrer">Storage Website</a>
+    </div>
+    <div class="site-link">
+      Direct static website:
+      <a id="storageSiteDirectLink" href="#" target="_blank" rel="noopener noreferrer">n/a</a>
+    </div>
+    <div id="status">Loading storage website links...</div>
+    <div class="report-list" id="reportList"></div>
+  </div>
+  <script src="./config.js"></script>
+  <script>
+    function loadStorageLinks() {
+      const status = document.getElementById("status");
+      const list = document.getElementById("reportList");
+      const storageWebBaseUrl = window.HELLO_PORTAL_CONFIG && window.HELLO_PORTAL_CONFIG.storageWebBaseUrl;
+
+      if (!storageWebBaseUrl) {
+        status.className = "error";
+        status.textContent = "Missing HELLO_PORTAL_CONFIG.storageWebBaseUrl";
+        return;
+      }
+
+      const baseUrl = storageWebBaseUrl.replace(/\/$/, "");
+      const reports = [
+        { title: "Architecture Overview (.NET Function + SWA + Storage)", name: "architecture-report.html", note: `${(window.HELLO_PORTAL_CONFIG?.projectName || "project").toUpperCase()} architecture and data flow.` },
+        { title: "Cloud Adoption Framework Naming Standard", name: "operations-report.html", note: "CAF naming patterns and concrete examples." },
+        { title: "CI/CD + Trunk-Based Delivery Benefits", name: "executive-kpi-report.html", note: "Professional delivery model and value outcomes." }
+      ];
+
+      status.textContent = `Storage static website: ${baseUrl}/`;
+
+      list.innerHTML = reports.map((report) => `
+        <div class="card">
+          <h3>${report.title}</h3>
+          <div class="meta">Path: /${report.name}</div>
+          <div class="meta">${report.note}</div>
+          <a href="${baseUrl}/${report.name}" target="_blank" rel="noopener noreferrer">Open report</a>
+        </div>
+      `).join("");
+    }
+
+    (function applyStorageLinks() {
+      const cfg = window.HELLO_PORTAL_CONFIG || {};
+      const storageWebBaseUrl = (cfg.storageWebBaseUrl || "").replace(/\/$/, "");
+      const navLink = document.getElementById("storageSiteNavLink");
+      const directLink = document.getElementById("storageSiteDirectLink");
+      if (navLink && storageWebBaseUrl) {
+        navLink.href = storageWebBaseUrl;
+      }
+      if (directLink) {
+        directLink.href = storageWebBaseUrl || "#";
+        directLink.textContent = storageWebBaseUrl ? `${storageWebBaseUrl}/` : "n/a";
+      }
+    })();
+
+    loadStorageLinks();
+  </script>
+</body>
+</html>

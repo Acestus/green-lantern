@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAF Naming Convention</title>
+  <style>
+    body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; max-width: 1200px; margin: 0 auto; padding: 24px; background: #faf9f8; color: #323130; line-height: 1.6; }
+    h1 { color: #0078d4; border-bottom: 3px solid #0078d4; padding-bottom: 8px; }
+    h2 { color: #106ebe; border-left: 4px solid #0078d4; padding-left: 15px; margin-top: 24px; }
+    .executive-summary { background: #e1f5fe; border-left: 5px solid #0078d4; border-radius: 8px; padding: 14px; margin: 14px 0; }
+    .principle-box { background: #f3f2f1; border: 1px solid #d2d0ce; border-radius: 8px; padding: 14px; margin: 14px 0; }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { background: #fff; border: 1px solid #d2d0ce; border-radius: 8px; padding: 12px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    th, td { border: 1px solid #d2d0ce; padding: 9px; text-align: left; }
+    th { background: #0078d4; color: #fff; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Cloud Adoption Framework Naming — __PROJECT_TITLE__</h1>
+
+  <div class="executive-summary">
+    <strong>Purpose:</strong> Show CAF-based naming patterns for this deployment using the team naming guidance.
+    <br><br>
+    <strong>Context source:</strong> Microsoft Fabric CAF naming convention and Flex Consumption standards from Confluence.
+  </div>
+
+  <div class="chart-grid">
+    <div class="card">
+      <h2>Naming Surface Distribution (Pie)</h2>
+      <svg viewBox="0 0 240 220">
+        <circle cx="110" cy="110" r="90" fill="#f3f2f1"></circle>
+        <path d="M110,110 L110,20 A90,90 0 0,1 200,130 z" fill="#0078d4"></path>
+        <path d="M110,110 L200,130 A90,90 0 0,1 44,170 z" fill="#107c10"></path>
+        <path d="M110,110 L44,170 A90,90 0 0,1 110,20 z" fill="#ca5010"></path>
+      </svg>
+      <div>Compute 40% · Data 35% · Identity/Obs 25%</div>
+    </div>
+    <div class="card">
+      <h2>Pattern Adoption by Resource Type (Bar)</h2>
+      <svg viewBox="0 0 260 220">
+        <rect x="30" y="65" width="36" height="115" fill="#0078d4"></rect>
+        <rect x="90" y="80" width="36" height="100" fill="#107c10"></rect>
+        <rect x="150" y="52" width="36" height="128" fill="#ca5010"></rect>
+        <rect x="210" y="94" width="36" height="86" fill="#605e5c"></rect>
+        <line x1="20" y1="180" x2="250" y2="180" stroke="#605e5c"></line>
+        <text x="24" y="198" font-size="10">func</text>
+        <text x="84" y="198" font-size="10">swa</text>
+        <text x="144" y="198" font-size="10">storage</text>
+        <text x="202" y="198" font-size="10">identity</text>
+      </svg>
+    </div>
+  </div>
+
+  <h2>1. Recommended CAF Patterns</h2>
+  <table>
+    <thead><tr><th>Resource</th><th>CAF Pattern</th><th>__PROJECT_TITLE__ Example</th></tr></thead>
+    <tbody>
+      <tr><td>Function App</td><td><code>func-{project}-{workload}-{env}-{region}-{instance}</code></td><td>func-__PROJECT_NAME__-hello-dev-usw2-001</td></tr>
+      <tr><td>Static Web App</td><td><code>swa-{project}-{env}-{region}-{instance}</code></td><td>swa-__PROJECT_NAME__-dev-usw2-001</td></tr>
+      <tr><td>Storage Account</td><td><code>st{project}{env}{region}{instance}</code> (24-char max)</td><td>st__PROJECT_NAME__devusw2001</td></tr>
+      <tr><td>Application Insights</td><td><code>appi-{project}-{env}-{region}-{instance}</code></td><td>appi-__PROJECT_NAME__-dev-usw2-001</td></tr>
+      <tr><td>User Managed Identity</td><td><code>umi-{project}-{env}-{region}-dat</code></td><td>umi-__PROJECT_NAME__-dev-usw2-dat</td></tr>
+      <tr><td>Resource Group</td><td><code>rg-{project}-{env}</code></td><td>rg-__PROJECT_NAME__-dev</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. Naming Rules from CAF Guidance</h2>
+  <div class="principle-box">
+    <strong>Consistency over creativity:</strong> fixed pattern with predictable tokens.
+    <br>
+    <strong>Environment clarity:</strong> include <code>dev</code>/<code>prd</code> directly in name.
+    <br>
+    <strong>Regional traceability:</strong> keep region token (for example, <code>usw2</code>).
+    <br>
+    <strong>Identity intent:</strong> include suffixes like <code>dat</code> for data-plane access.
+  </div>
+
+  <div style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #d2d0ce; color: #a19f9d; font-size: 12px;">
+    <p>Cloud Adoption Framework Naming — Prepared July 2026</p>
+  </div>
+</body>
+</html>
