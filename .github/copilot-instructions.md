@@ -199,8 +199,8 @@ $runningJobs | Wait-Job | Receive-Job
 - Deploy function apps in parallel
 
 ### Required Secrets/Variables
-- `AZURE_CLIENT_ID`: Client ID for the `umi-mgmt-dev-scus-ctl` managed identity
-- `AZURE_TENANT_ID`: Azure AD tenant ID
+- No GitHub variables are required for OIDC in this template; the workflow
+  files already include the managed identity client ID and tenant ID.
 - Target subscription: `acestus` (`df64929f-810d-4176-8097-35cd05cae10d`)
 - `RESOURCE_GROUP_NAME`: Target resource group
 

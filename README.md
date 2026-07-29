@@ -201,9 +201,8 @@ Both workflows are deterministic and environment-fixed:
 
 ### Required Secrets
 
-Configure these GitHub variables for the workflows:
-- `AZURE_CLIENT_ID` - Client ID for `umi-mgmt-dev-scus-ctl`
-- `AZURE_TENANT_ID` - Azure AD tenant ID
+No GitHub variables are required for OIDC in this template. The workflows use
+the managed identity client ID and tenant ID baked into the workflow files.
 
 ## Technologies
 

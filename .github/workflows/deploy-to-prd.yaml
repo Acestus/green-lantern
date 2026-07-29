@@ -23,6 +23,8 @@ env:
   ENVIRONMENT: prd
   REGION_CODE: usw2
   INSTANCE_NUMBER: "001"
+  AZURE_CLIENT_ID: 560461b1-6b93-4d8e-8d60-b84e38df35ef
+  AZURE_TENANT_ID: f81d921a-9cda-470d-a8bd-f12b7a65091c
   TARGET_SUBSCRIPTION_ID: df64929f-810d-4176-8097-35cd05cae10d
   TARGET_SUBSCRIPTION_NAME: acestus
   SWA_APP_LOCATION: swa/hello-portal
@@ -64,8 +66,8 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ steps.cfg.outputs.subscription_id }}
 
       - name: Prepare deployment parameters
@@ -116,10 +118,7 @@ jobs:
           echo "❌ Infra stage failed."
           echo "   Likely causes:"
           echo "     • OIDC federated credential mismatch for environment:prd"
-          echo "     • Missing environment variables (AZURE_CLIENT_ID, AZURE_TENANT_ID)"
           echo "     • Bicep parameter mismatch for projectName/target subscription"
-          echo "   Try:"
-          echo "     • Verify env vars: gh variable list -R Acestus/template-functions"
           echo "     • Validate deployment: az deployment group what-if --resource-group rg-${{ steps.cfg.outputs.project }}-prd --template-file infrastructure/main.bicep --parameters ${{ steps.infra.outputs.param_file }}"
 
   upload-storage-reports:
@@ -134,8 +133,8 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Upload storage-hosted HTML reports
@@ -217,8 +216,8 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Ensure App Insights API key and function setting
@@ -285,8 +284,8 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Deploy Hello World code
@@ -322,8 +321,8 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Write SWA runtime config
@@ -463,8 +462,8 @@ jobs:
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Publish deployment summary
