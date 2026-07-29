@@ -21,10 +21,21 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$TargetSubscriptionId = 'df64929f-810d-4176-8097-35cd05cae10d'
+
 # Configuration
 $ProjectName = 'functemplate'
 $Region = 'usw2'
 $InstanceNumber = '001'
+
+$CurrentSubscriptionId = (az account show --query id -o tsv 2>$null).Trim()
+if ([string]::IsNullOrWhiteSpace($CurrentSubscriptionId)) {
+    throw "No Azure CLI context found. Sign in first, then rerun this script."
+}
+
+if ($CurrentSubscriptionId -ne $TargetSubscriptionId) {
+    throw "This template only deploys to subscription $TargetSubscriptionId (acestus). Current subscription: $CurrentSubscriptionId"
+}
 
 # Function app to deploy
 $FunctionApps = @(

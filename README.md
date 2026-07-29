@@ -11,8 +11,11 @@ Use this when you want one-click deployment from GitHub Actions.
 3. Click **Run workflow**.
 4. Set:
    - `projectName` (example: `hello02`)
-   - `subscription` (example: `Sbox-510-Infrastructure`)
 5. Run and monitor until all deploy/build/publish steps are green.
+
+The GitHub Action workflows are pinned to the `acestus` subscription
+(`df64929f-810d-4176-8097-35cd05cae10d`) and use OIDC with the managed identity
+`/subscriptions/df64929f-810d-4176-8097-35cd05cae10d/resourceGroups/rg-mgmt-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/umi-mgmt-dev-scus-ctl`.
 
 ## Quickstart (Contributor role)
 
@@ -20,7 +23,7 @@ If you have **Contributor** access on the target subscription/resource group, yo
 
 ```bash
 # 1) Set deployment values
-SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000"
+SUBSCRIPTION_ID="df64929f-810d-4176-8097-35cd05cae10d"
 PROJECT_NAME="hello02"
 ENVIRONMENT="dev"
 REGION="usw2"
@@ -173,8 +176,11 @@ Use one of the two manual button workflows:
 - `.github/workflows/deploy-to-prd.yaml`
 
 Both accept:
-- `subscription`
 - `projectName`
+
+Both workflows deploy only to the `acestus` subscription
+(`df64929f-810d-4176-8097-35cd05cae10d`) and authenticate with OIDC through the
+managed identity `/subscriptions/df64929f-810d-4176-8097-35cd05cae10d/resourceGroups/rg-mgmt-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/umi-mgmt-dev-scus-ctl`.
 
 That workflow deterministically deploys:
 1. Resource group (`rg-{projectName}-dev`)
@@ -196,8 +202,7 @@ Both workflows are deterministic and environment-fixed:
 ### Required Secrets
 
 Configure these GitHub variables for the workflows:
-- `UMI_SKPMGT_DEV_USW2_CTL` - Client ID used by `deploy-to-dev.yaml`
-- `UMI_SKPMGT_PRD_USW2_CTL` - Client ID used by `deploy-to-prd.yaml`
+- `AZURE_CLIENT_ID` - Client ID for `umi-mgmt-dev-scus-ctl`
 - `AZURE_TENANT_ID` - Azure AD tenant ID
 
 ## Technologies

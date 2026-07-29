@@ -199,9 +199,9 @@ $runningJobs | Wait-Job | Receive-Job
 - Deploy function apps in parallel
 
 ### Required Secrets/Variables
-- `AZURE_CLIENT_ID`: Service Principal client ID
-- `AZURE_SUBSCRIPTION_ID`: Target subscription
+- `AZURE_CLIENT_ID`: Client ID for the `umi-mgmt-dev-scus-ctl` managed identity
 - `AZURE_TENANT_ID`: Azure AD tenant ID
+- Target subscription: `acestus` (`df64929f-810d-4176-8097-35cd05cae10d`)
 - `RESOURCE_GROUP_NAME`: Target resource group
 
 ## Code Review Conventions

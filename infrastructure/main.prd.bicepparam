@@ -9,7 +9,7 @@ param tags = {
   ManagedBy: 'https://github.com/Acestus/template-functions'
   CreatedBy: '''template-owner'''
   Environment: 'Production'
-  Subscription: 'Corp-510-Infrastructure'
+  Subscription: 'acestus'
   Project: 'Azure Functions Template'
   CAFName: '${projectName}-${environment}-${region}-${instanceNumber}'
 }

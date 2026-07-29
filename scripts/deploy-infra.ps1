@@ -21,6 +21,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$TargetSubscriptionId = 'df64929f-810d-4176-8097-35cd05cae10d'
+
 # Configuration
 $ProjectName = 'functemplate'
 $Region = 'usw2'
@@ -30,6 +32,15 @@ $ResourceGroupName = "rg-$CafName"
 $StackName = "stack-$CafName"
 $TemplateFile = Join-Path $PSScriptRoot '..' 'infrastructure' 'main.bicep'
 $ParameterFile = Join-Path $PSScriptRoot '..' 'infrastructure' "main.$Environment.bicepparam"
+
+$CurrentContext = Get-AzContext
+if (-not $CurrentContext) {
+    throw "No Azure context found. Sign in first, then rerun this script."
+}
+
+if ($CurrentContext.Subscription.Id -ne $TargetSubscriptionId) {
+    throw "This template only deploys to subscription $TargetSubscriptionId (acestus). Current subscription: $($CurrentContext.Subscription.Id)"
+}
 
 Write-Host "Deploying infrastructure for environment: $Environment" -ForegroundColor Cyan
 Write-Host "Resource Group: $ResourceGroupName" -ForegroundColor Gray
