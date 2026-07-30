@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lake Cities Texas Travel Guide</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2a33;
+      --muted: #60717f;
+      --line: #d5dee5;
+      --paper: #fbfaf7;
+      --panel: #ffffff;
+      --lake: #2a7f9e;
+      --cypress: #1f6f55;
+      --sun: #c9822b;
+      --clay: #8f4e38;
+      --shadow: 0 16px 36px rgba(31, 42, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    a {
+      color: #145f86;
+      font-weight: 700;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      font-weight: 800;
+      color: var(--cypress);
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      padding: 9px 12px;
+      text-decoration: none;
+      background: var(--panel);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+      gap: 28px;
+      align-items: stretch;
+      margin-bottom: 30px;
+    }
+
+    .hero-copy {
+      padding: 28px 0;
+    }
+
+    .eyebrow {
+      color: var(--clay);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 8px 0 12px;
+      max-width: 780px;
+      color: var(--ink);
+      font-size: clamp(38px, 7vw, 72px);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .lede {
+      max-width: 670px;
+      color: var(--muted);
+      font-size: 19px;
+    }
+
+    .quick-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .quick-row div,
+    .card,
+    .source-list,
+    .map-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .quick-row div {
+      padding: 14px;
+    }
+
+    .quick-row strong {
+      display: block;
+      color: var(--cypress);
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .quick-row span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .map-panel {
+      overflow: hidden;
+      min-height: 440px;
+      position: relative;
+      background:
+        linear-gradient(145deg, rgba(42, 127, 158, 0.12), rgba(31, 111, 85, 0.08)),
+        #f6fbfb;
+    }
+
+    .guide-map {
+      width: 100%;
+      height: 100%;
+      min-height: 440px;
+      display: block;
+    }
+
+    .map-label {
+      font: 700 16px "Segoe UI", Tahoma, sans-serif;
+      fill: var(--ink);
+    }
+
+    .map-note {
+      font: 600 12px "Segoe UI", Tahoma, sans-serif;
+      fill: var(--muted);
+    }
+
+    section {
+      margin: 30px 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 2px solid var(--line);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      max-width: 520px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      color: #145f86;
+      font-size: 20px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      background: #edf7f1;
+      color: var(--cypress);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 9px;
+      margin-bottom: 10px;
+    }
+
+    .season {
+      border-top: 5px solid var(--lake);
+    }
+
+    .season:nth-child(2) {
+      border-top-color: var(--cypress);
+    }
+
+    .season:nth-child(3) {
+      border-top-color: var(--sun);
+    }
+
+    .season:nth-child(4) {
+      border-top-color: var(--clay);
+    }
+
+    ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    li + li {
+      margin-top: 7px;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .timeline .card {
+      min-height: 178px;
+    }
+
+    .source-list {
+      padding: 18px;
+    }
+
+    .source-list p {
+      margin: 0 0 10px;
+      color: var(--muted);
+    }
+
+    .source-list a {
+      display: inline-block;
+      margin: 0 14px 8px 0;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .grid,
+      .grid.two,
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        padding: 8px 0 0;
+      }
+
+      .quick-row {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .topbar {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">Green Lantern Local Guides</div>
+      <nav class="nav" aria-label="Site navigation">
+        <a href="/index.html">Home</a>
+        <a href="/compliance.html">Compliance</a>
+        <a href="/disney-cruise-line.html">Cruise Guide</a>
+      </nav>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <div class="eyebrow">Hickory Creek, Corinth, and Lake Dallas</div>
+        <h1 id="page-title">Lake Cities Texas Travel Guide</h1>
+        <p class="lede">A practical year-round plan for a weekend, family visit, or local reset around Lake Lewisville. Use it as a seasonal checklist, then confirm dates on the city calendars before you go.</p>
+        <div class="quick-row" aria-label="Quick city picks">
+          <div>
+            <strong>Hickory Creek</strong>
+            <span>Best for shoreline parks, camping, boat access, nature walks, and sunset lake time.</span>
+          </div>
+          <div>
+            <strong>Corinth</strong>
+            <span>Best for community events, parks, sports fields, casual meals, and a central Lake Cities base.</span>
+          </div>
+          <div>
+            <strong>Lake Dallas</strong>
+            <span>Best for compact small-town stops, lakeside parks, fishing, and easy I-35 access.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-panel" aria-label="Illustrated Lake Cities route map">
+        <svg class="guide-map" viewBox="0 0 520 520" role="img" aria-labelledby="map-title map-desc">
+          <title id="map-title">Lake Cities travel map</title>
+          <desc id="map-desc">A simplified map showing Lake Lewisville beside Hickory Creek, Corinth, and Lake Dallas.</desc>
+          <rect width="520" height="520" fill="#f6fbfb"/>
+          <path d="M46 76 C121 38, 181 88, 229 61 C293 25, 364 51, 396 111 C425 165, 398 202, 429 245 C462 291, 443 363, 393 395 C340 430, 287 400, 236 438 C179 482, 91 448, 82 376 C74 315, 122 284, 86 230 C49 176, -4 125, 46 76 Z" fill="#9bd2e0"/>
+          <path d="M102 122 C162 94, 214 128, 252 103 C307 68, 363 95, 379 149 C393 198, 353 232, 385 281 C413 324, 369 373, 320 371 C273 369, 244 347, 201 380 C157 415, 100 383, 116 327 C132 274, 164 253, 129 207 C95 164, 63 140, 102 122 Z" fill="#2a7f9e" opacity="0.86"/>
+          <path d="M42 428 C145 402, 249 394, 478 424" stroke="#d0b17a" stroke-width="22" stroke-linecap="round" opacity="0.7"/>
+          <path d="M48 428 C150 407, 250 398, 472 426" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+          <circle cx="356" cy="168" r="9" fill="#1f6f55"/>
+          <circle cx="377" cy="294" r="9" fill="#c9822b"/>
+          <circle cx="284" cy="369" r="9" fill="#8f4e38"/>
+          <text x="370" y="164" class="map-label">Hickory Creek</text>
+          <text x="392" y="291" class="map-label">Corinth</text>
+          <text x="298" y="368" class="map-label">Lake Dallas</text>
+          <text x="72" y="304" class="map-label" fill="#ffffff">Lake Lewisville</text>
+          <text x="58" y="458" class="map-note">I-35E corridor and lakeside day-trip loop</text>
+          <g fill="#ffffff" opacity="0.9">
+            <circle cx="153" cy="174" r="4"/>
+            <circle cx="214" cy="230" r="3"/>
+            <circle cx="294" cy="154" r="3"/>
+            <circle cx="246" cy="312" r="4"/>
+            <circle cx="339" cy="235" r="3"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section aria-labelledby="year-round-title">
+      <div class="section-head">
+        <h2 id="year-round-title">What To Do Throughout The Year</h2>
+        <p>North Texas weather rewards planning: spring and fall are made for parks, summer belongs near the water, and winter is best for short loops, food stops, and low-crowd trails.</p>
+      </div>
+      <div class="grid">
+        <article class="card season">
+          <span class="tag">Spring</span>
+          <h3>Wildflowers, trails, and early lake days</h3>
+          <p>Start with Hickory Creek parks and nature trails before the heat settles in. Add a Corinth park stop for playground time or a youth sports weekend, then finish with dinner near Lake Dallas.</p>
+          <ul>
+            <li>Book Hickory Creek campground weekends early.</li>
+            <li>Pack binoculars for birds and shoreline wildlife.</li>
+            <li>Use city calendars for Easter, cleanup, and spring festival dates.</li>
+          </ul>
+        </article>
+        <article class="card season">
+          <span class="tag">Summer</span>
+          <h3>Water mornings and shaded afternoons</h3>
+          <p>Keep the hard outdoor part early: boat ramp, fishing, swimming, or a picnic near Lewisville Lake. Shift to indoor meals, splash-friendly errands, or evening events once the temperature peaks.</p>
+          <ul>
+            <li>Check lake levels, park alerts, and gate hours before leaving.</li>
+            <li>Bring shade, water shoes, sunscreen, and extra drinking water.</li>
+            <li>Look for Corinth evening movies, concerts, and family events.</li>
+          </ul>
+        </article>
+        <article class="card season">
+          <span class="tag">Fall</span>
+          <h3>Best weather for visitors</h3>
+          <p>Fall is the easiest season to show off the Lake Cities: lakeside coffee or breakfast, a late-morning walk, lunch in Corinth, then an event or sunset drive through Hickory Creek and Lake Dallas.</p>
+          <ul>
+            <li>Watch for bicycle rallies, Halloween events, and city festivals.</li>
+            <li>Plan golden-hour photos around Lake Lewisville overlooks.</li>
+            <li>Use Lake Dallas as the compact stop for quick food and park access.</li>
+          </ul>
+        </article>
+        <article class="card season">
+          <span class="tag">Winter</span>
+          <h3>Quiet trails, holiday lights, and local meals</h3>
+          <p>Cold fronts make the lake feel calmer and less crowded. Keep the route flexible: a short park walk, a coffee stop, a local lunch, and a holiday event if one is on the calendar.</p>
+          <ul>
+            <li>Layer for wind near open water.</li>
+            <li>Check municipal calendars for tree lightings and winter markets.</li>
+            <li>Use rainy days for downtown Denton or Lewisville side trips.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="itineraries-title">
+      <div class="section-head">
+        <h2 id="itineraries-title">Easy Itineraries</h2>
+        <p>These are meant to be simple enough to use with kids, guests, or a half-day opening in the schedule.</p>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>Lake Morning</h3>
+          <p>Start in Hickory Creek for a shoreline walk or fishing stop, bring breakfast tacos or coffee, then drive south toward Lake Dallas before the afternoon heat.</p>
+        </article>
+        <article class="card">
+          <h3>Family Saturday</h3>
+          <p>Use Corinth Community Park or a neighborhood park as the anchor, add lunch nearby, then check Corinth or Hickory Creek events for the evening.</p>
+        </article>
+        <article class="card">
+          <h3>Visitor Weekend</h3>
+          <p>Camp or picnic near Hickory Creek, spend the next morning in Lake Dallas, and use Corinth as the practical middle for groceries, restaurants, and community programming.</p>
+        </article>
+        <article class="card">
+          <h3>Rainy Day Backup</h3>
+          <p>Keep the Lake Cities route short, then pivot to Denton Square, Lewisville restaurants, or indoor errands along I-35E if storms roll through.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="planning-title">
+      <div class="section-head">
+        <h2 id="planning-title">Annual Planning Board</h2>
+        <p>A lightweight month-by-month rhythm for deciding when to invite people, camp, or just keep it local.</p>
+      </div>
+      <div class="timeline">
+        <article class="card">
+          <h3>Jan-Mar</h3>
+          <p>Quiet walks, birding, campground scouting, and low-crowd restaurant stops. Watch weather windows after cold fronts.</p>
+        </article>
+        <article class="card">
+          <h3>Apr-Jun</h3>
+          <p>Prime park season. Book camping, plan spring guests, and use lake mornings before school-year schedules fully unwind.</p>
+        </article>
+        <article class="card">
+          <h3>Jul-Sep</h3>
+          <p>Water-first plans, evening events, and shaded routes. September is often the bridge into better outdoor weekends.</p>
+        </article>
+        <article class="card">
+          <h3>Oct-Dec</h3>
+          <p>Fall festivals, holiday events, cooler trail walks, and the easiest time to build a full Lake Cities day trip.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="city-title">
+      <div class="section-head">
+        <h2 id="city-title">City Notes</h2>
+        <p>Each city has a different job in the guide, so the best route uses all three instead of treating them as interchangeable stops.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <h3>Hickory Creek</h3>
+          <p>Lead with lake access. The town highlights multiple U.S. Army Corps of Engineers parks along Lake Lewisville, with several maintained locally through lease agreements.</p>
+        </article>
+        <article class="card">
+          <h3>Corinth</h3>
+          <p>Use Corinth for organized recreation and calendar-driven plans. The city lists more than 150 acres of park land, neighborhood parks, a dog park, community park, and the Commons at Agora.</p>
+        </article>
+        <article class="card">
+          <h3>Lake Dallas</h3>
+          <p>Use Lake Dallas for the compact lakeside-town feel. The city describes five parks across its 2.5-square-mile community, from Lake Lewisville to the I-35 corridor.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="sources-title">
+      <div class="section-head">
+        <h2 id="sources-title">Local Sources</h2>
+        <p>Dates and park conditions change, so these are the pages to check before turning the guide into a live itinerary.</p>
+      </div>
+      <div class="source-list">
+        <p>Research snapshot: July 30, 2026.</p>
+        <a href="https://www.hickorycreek-tx.gov/parktrail" target="_blank" rel="noopener noreferrer">Hickory Creek Parks & Trails</a>
+        <a href="https://www.hickorycreek-tx.gov/home" target="_blank" rel="noopener noreferrer">Hickory Creek Calendar</a>
+        <a href="https://www.corinthtx.gov/parksrec" target="_blank" rel="noopener noreferrer">Corinth Parks & Recreation</a>
+        <a href="https://www.corinthtx.gov/special-events" target="_blank" rel="noopener noreferrer">Corinth Special Events</a>
+        <a href="https://www.lakedallas.com/287/Parks-Recreation" target="_blank" rel="noopener noreferrer">Lake Dallas Parks & Recreation</a>
+        <a href="https://www.recreation.gov/camping/campgrounds/232600" target="_blank" rel="noopener noreferrer">Hickory Creek Campground</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
