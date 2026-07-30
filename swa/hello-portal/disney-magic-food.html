@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disney Magic Food Guide</title>
+  <meta name="description" content="A Disney Magic food guide with a clear heading, TLDR, body, questions, FAQ, and schema markup.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%BF%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #13293d;
+      --muted: #546170;
+      --accent: #0f766e;
+      --accent-2: #f59e0b;
+      --card: rgba(255, 255, 255, 0.88);
+      --line: rgba(19, 41, 61, 0.12);
+      --shadow: 0 24px 60px rgba(19, 41, 61, 0.16);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.22), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.18), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%);
+    }
+    .hero {
+      position: relative;
+      min-height: 44vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(9, 18, 33, 0.08), rgba(9, 18, 33, 0.72)),
+        url("./assets/images/family-cruise-sunset.png") center/cover no-repeat;
+      transform: scale(1.02);
+    }
+    .hero-inner {
+      position: relative;
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 28px;
+      color: #fff;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(2.4rem, 5vw, 4.8rem);
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+      max-width: 12ch;
+    }
+    .lede {
+      max-width: 68ch;
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0;
+    }
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: -34px auto 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .topbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .topbar a {
+      text-decoration: none;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(19, 41, 61, 0.08);
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+    .section {
+      padding: 28px;
+      border-top: 1px solid var(--line);
+    }
+    .section:first-child {
+      border-top: 0;
+    }
+    .label {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 800;
+    }
+    .tldr {
+      font-size: 1.08rem;
+      line-height: 1.8;
+      margin: 0;
+      color: var(--ink);
+      max-width: 78ch;
+    }
+    .body-copy {
+      display: grid;
+      gap: 14px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+    .body-copy strong {
+      color: var(--ink);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+    }
+    .question-list,
+    .faq-list {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .question,
+    .faq-item {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+    }
+    .question h3,
+    .faq-item h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+    .question p,
+    .faq-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+    .callout {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent-2);
+      background: rgba(245, 158, 11, 0.08);
+      border-radius: 14px;
+      color: var(--ink);
+    }
+    .small {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    @media (max-width: 720px) {
+      .hero-inner,
+      main {
+        width: min(100% - 20px, 1080px);
+      }
+      .section {
+        padding: 22px 18px;
+      }
+      h1 {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Disney Magic · Food Notes</div>
+      <h1>Disney Magic food guide</h1>
+      <p class="lede">A simple, readable page for the kind of Disney cruise food notes people actually want: where to eat, what to try, what to book, and the questions that come up before sailing.</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="topbar" aria-label="Page navigation">
+      <a href="/index.html">Home</a>
+      <a href="/data.html">Data Demo</a>
+      <a href="/observability.html">Observability</a>
+    </nav>
+
+    <article class="panel">
+      <section class="section" aria-labelledby="tldr-heading">
+        <p class="label">TLDR</p>
+        <h2 id="tldr-heading">TLDR</h2>
+        <p class="tldr">
+          On Disney Magic, the best food strategy is simple: lean into the rotational dining rooms for the full experience, use quick-service spots for easy wins between activities, and keep an eye out for the small indulgences that make the trip feel special.
+        </p>
+        <div class="chips" aria-label="Highlights">
+          <span class="chip">Rotational dining</span>
+          <span class="chip">Quick-service snacks</span>
+          <span class="chip">Family-friendly desserts</span>
+          <span class="chip">Late-night bites</span>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="body-heading">
+        <p class="label">Body</p>
+        <h2 id="body-heading">Body</h2>
+        <div class="body-copy">
+          <p>
+            Disney Magic is built for a relaxed food rhythm. Start with breakfast that fits the day, save the more memorable meals for dinner, and leave room for the little extras that show up when you are wandering the ship.
+          </p>
+          <p>
+            <strong>What tends to work best:</strong> use the main dining rooms for the sit-down story of the cruise, try the casual options when you want flexibility, and treat desserts like part of the itinerary instead of an afterthought.
+          </p>
+          <p>
+            If you are planning content around Disney food on Disney Magic, focus on the balance between convenience and spectacle. The ship is at its best when a quick lunch, a themed dinner, and a late snack all feel intentionally different.
+          </p>
+          <div class="callout">
+            <strong>Good angle for this page:</strong> write it like a practical family guide, not a glossy brochure. Readers usually want what to eat, when to eat, and what is worth the detour.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="questions-heading">
+        <p class="label">Questions</p>
+        <h2 id="questions-heading">Questions</h2>
+        <ul class="question-list">
+          <li class="question">
+            <h3>What should we prioritize first on Disney Magic?</h3>
+            <p>Book the dinner experience you care about most, then plan around the quick-service food that keeps the day easy.</p>
+          </li>
+          <li class="question">
+            <h3>Where do the best casual bites usually happen?</h3>
+            <p>Usually near the pool deck and the most convenient dining spots, especially when you want food without interrupting the day.</p>
+          </li>
+          <li class="question">
+            <h3>How do we keep the food page useful?</h3>
+            <p>Make it specific. Mention the dining style, the snacks, the timing, and the kind of traveler who will care about each recommendation.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-heading">
+        <p class="label">FAQ</p>
+        <h2 id="faq-heading">FAQ</h2>
+        <ul class="faq-list">
+          <li class="faq-item">
+            <h3>Is this an official Disney dining guide?</h3>
+            <p>No. It is a practical page format for describing food on Disney Magic in a clean, easy-to-scan way.</p>
+          </li>
+          <li class="faq-item">
+            <h3>Does Disney Magic have enough food variety for picky eaters?</h3>
+            <p>Yes, that is part of the appeal. The mix of sit-down meals, casual options, and desserts gives most families a workable set of choices.</p>
+          </li>
+          <li class="faq-item">
+            <h3>What makes Disney cruise food content better than a generic travel page?</h3>
+            <p>Specificity. Readers want the ship name, the dining style, and the practical advice that helps them decide what to do next.</p>
+          </li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script>
+    const schema = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": `${window.location.origin}${window.location.pathname}`,
+          "name": "Disney Magic food guide",
+          "description": "A Disney Magic food guide with a heading, TLDR, body, questions, FAQ, and schema markup.",
+          "about": {
+            "@type": "Thing",
+            "name": "Disney Magic food on Disney Cruise Line"
+          },
+          "mainEntity": {
+            "@id": `${window.location.origin}${window.location.pathname}#faq`
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": `${window.location.origin}${window.location.pathname}#faq`,
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is this an official Disney dining guide?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. It is a practical page format for describing food on Disney Magic in a clean, easy-to-scan way."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Disney Magic have enough food variety for picky eaters?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, that is part of the appeal. The mix of sit-down meals, casual options, and desserts gives most families a workable set of choices."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What makes Disney cruise food content better than a generic travel page?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Specificity. Readers want the ship name, the dining style, and the practical advice that helps them decide what to do next."
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    const ld = document.createElement("script");
+    ld.type = "application/ld+json";
+    ld.textContent = JSON.stringify(schema);
+    document.head.appendChild(ld);
+  </script>
+</body>
+</html>
