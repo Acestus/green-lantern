@@ -119,6 +119,45 @@ HTTP trigger app that provides greeting plus live storage and observability APIs
 - `POST /api/hello` with body `{"name": "John"}` - Returns "Hello, John!"
 - `GET /api/storage/summary` - Returns live Blob/Queue/Table data from the deployed storage account
 - `GET /api/observability/appinsights` - Returns live App Insights request/error/latency data (last hour)
+- `GET /api/compliance/dashboard` - Returns Azure Policy/resource group compliance dashboard data
+- `POST /api/compliance/remediation` - Starts or previews an Azure Policy remediation task
+
+### Compliance Demo
+
+The Static Web App includes `/compliance.html`, a quick Azure Policy demo page
+that shows policy summary metrics, resource groups, Azure CLI command previews,
+and a remediation trigger.
+
+By default, the Function returns demo data and does not execute Azure CLI. To
+use live Azure CLI-backed data, configure the Function App with:
+
+```bash
+AZURE_CLI_ENABLE=true
+AZURE_CLI_PATH=az
+AZURE_SUBSCRIPTION_ID=<subscription-id>
+```
+
+The Function identity or runtime identity must be able to run Azure CLI and must
+have enough Azure RBAC to read resource groups and policy state. For live
+remediation, it also needs permission to create policy remediation tasks for the
+target scope.
+
+Useful commands for validating the same data locally:
+
+```bash
+az group list \
+  --query "[].{name:name,location:location,provisioningState:properties.provisioningState,tags:tags}" \
+  -o json
+
+az policy state summarize -o json
+
+az policy remediation create \
+  --name green-lantern-remediate-demo \
+  --policy-assignment <policy-assignment-id-or-name> \
+  --resource-group <resource-group-name> \
+  --resource-discovery-mode ReEvaluateCompliance \
+  -o json
+```
 
 ## Prerequisites
 

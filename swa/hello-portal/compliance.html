@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Dashboard</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f7f5;
+      --panel: #ffffff;
+      --border: #d7d7d2;
+      --text: #252423;
+      --muted: #62605c;
+      --accent: #0078d4;
+      --good: #107c10;
+      --warn: #986f0b;
+      --bad: #a4262c;
+      --ink: #1f2933;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 32px;
+      line-height: 1.15;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--muted);
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .nav a {
+      color: #ffffff;
+      background: var(--accent);
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-decoration: none;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      background: #eef6fc;
+      border: 1px solid #c7e0f4;
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      color: var(--ink);
+    }
+
+    .status.error {
+      background: #fdf3f4;
+      border-color: #f1bbbc;
+      border-left-color: var(--bad);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 30px;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #edebe9;
+      padding: 11px 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fafafa;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag.good {
+      color: var(--good);
+      border-color: #bad80a;
+      background: #f1f8e8;
+    }
+
+    .tag.warn {
+      color: var(--warn);
+      border-color: #f7d154;
+      background: #fff8df;
+    }
+
+    .tag.bad {
+      color: var(--bad);
+      border-color: #f3b0b4;
+      background: #fff1f2;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    button {
+      width: 100%;
+      min-height: 40px;
+      border-radius: 8px;
+      font: inherit;
+    }
+
+    input,
+    select {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+
+    button {
+      margin-top: 14px;
+      border: 0;
+      background: var(--accent);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 14px;
+    }
+
+    button:disabled {
+      background: #a19f9d;
+      cursor: wait;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 10px 0 0;
+      padding: 12px;
+      border-radius: 8px;
+      background: #202428;
+      color: #f5f5f5;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .commands {
+      margin-top: 18px;
+    }
+
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 900px) {
+      .summary,
+      .layout,
+      .command-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wrap {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Azure Policy Compliance</h1>
+    <p class="subtitle">Resource group inventory, policy summary, and remediation task trigger.</p>
+
+    <nav class="nav" aria-label="Portal navigation">
+      <a href="/index.html">Home</a>
+      <a href="/compliance.html">Compliance</a>
+      <a href="/data.html">Blob/Queue/Table Demo</a>
+      <a href="/observability.html">App Insights</a>
+      <a href="/homeschool.html">Homeschool</a>
+      <a href="/movies.html">Box Office Movies</a>
+    </nav>
+
+    <div id="status" class="status">
+      <span>Loading compliance data...</span>
+      <span id="modePill" class="pill">mode: loading</span>
+    </div>
+
+    <div class="summary" aria-label="Compliance summary">
+      <div class="metric">
+        <span>Non-compliant resources</span>
+        <strong id="resourceCount">0</strong>
+      </div>
+      <div class="metric">
+        <span>Non-compliant policies</span>
+        <strong id="policyCount">0</strong>
+      </div>
+      <div class="metric">
+        <span>Policy assignments</span>
+        <strong id="assignmentCount">0</strong>
+      </div>
+    </div>
+
+    <div class="layout">
+      <section>
+        <h2>Resource Groups</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Location</th>
+                <th>State</th>
+                <th>Compliance</th>
+                <th>Non-compliant</th>
+              </tr>
+            </thead>
+            <tbody id="resourceGroupRows">
+              <tr><td colspan="5">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Remediation Task</h2>
+        <form id="remediationForm">
+          <label for="resourceGroupSelect">Resource group</label>
+          <select id="resourceGroupSelect" name="resourceGroup" required></select>
+
+          <label for="policyAssignmentId">Policy assignment ID or name</label>
+          <input id="policyAssignmentId" name="policyAssignmentId" placeholder="/subscriptions/.../policyAssignments/..." autocomplete="off">
+
+          <label for="remediationName">Remediation name</label>
+          <input id="remediationName" name="remediationName" placeholder="green-lantern-remediate-demo" autocomplete="off">
+
+          <button id="remediationButton" type="submit">Trigger Remediation</button>
+        </form>
+        <p class="muted" id="remediationHint"></p>
+        <pre id="remediationResult">No remediation task submitted yet.</pre>
+      </section>
+    </div>
+
+    <section class="commands">
+      <h2>Azure CLI Commands</h2>
+      <div class="command-grid">
+        <div>
+          <div class="muted">Resource groups</div>
+          <pre id="resourceGroupCommand">az group list -o json</pre>
+        </div>
+        <div>
+          <div class="muted">Policy summary</div>
+          <pre id="policySummaryCommand">az policy state summarize -o json</pre>
+        </div>
+        <div>
+          <div class="muted">Remediation</div>
+          <pre id="remediationCommand">az policy remediation create ...</pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./config.js"></script>
+  <script>
+    const state = {
+      apiBaseUrl: (window.HELLO_PORTAL_CONFIG && window.HELLO_PORTAL_CONFIG.apiBaseUrl || "").replace(/\/$/, ""),
+      resourceGroups: []
+    };
+
+    function setText(id, value) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = value;
+      }
+    }
+
+    function getSummaryValue(summary, key) {
+      if (!summary || typeof summary !== "object") {
+        return 0;
+      }
+
+      if (Number.isFinite(summary[key])) {
+        return summary[key];
+      }
+
+      const lowerKey = key.toLowerCase();
+      if (summary.results && Array.isArray(summary.results.queryResults)) {
+        const match = summary.results.queryResults.find((item) => {
+          return item && item.policyDetails && String(item.policyDetails.policyDefinitionReferenceId || "").toLowerCase().includes(lowerKey);
+        });
+        return match ? match.nonCompliantResources || 0 : 0;
+      }
+
+      return 0;
+    }
+
+    function normalizeResourceGroup(group) {
+      const tags = group.tags && typeof group.tags === "object" ? group.tags : {};
+      const nonCompliant = Number.isFinite(group.nonCompliantResources)
+        ? group.nonCompliantResources
+        : Number(tags.nonCompliantResources || 0);
+      const compliance = group.compliance || tags.compliance || (nonCompliant > 0 ? "Non-compliant" : "Review");
+
+      return {
+        name: group.name || "unnamed",
+        location: group.location || "n/a",
+        provisioningState: group.provisioningState || group.properties?.provisioningState || "n/a",
+        compliance,
+        nonCompliantResources: nonCompliant
+      };
+    }
+
+    function complianceClass(value) {
+      const normalized = String(value || "").toLowerCase();
+      if (normalized.includes("non")) {
+        return "bad";
+      }
+      if (normalized.includes("compliant")) {
+        return "good";
+      }
+      return "warn";
+    }
+
+    function renderResourceGroups(groups) {
+      const rows = document.getElementById("resourceGroupRows");
+      const select = document.getElementById("resourceGroupSelect");
+      if (!rows || !select) {
+        return;
+      }
+
+      state.resourceGroups = groups.map(normalizeResourceGroup);
+      if (state.resourceGroups.length === 0) {
+        rows.innerHTML = '<tr><td colspan="5">No resource groups returned.</td></tr>';
+        select.innerHTML = '<option value="">No resource groups</option>';
+        return;
+      }
+
+      rows.innerHTML = state.resourceGroups.map((group) => {
+        return `<tr>
+          <td>${escapeHtml(group.name)}</td>
+          <td>${escapeHtml(group.location)}</td>
+          <td>${escapeHtml(group.provisioningState)}</td>
+          <td><span class="tag ${complianceClass(group.compliance)}">${escapeHtml(group.compliance)}</span></td>
+          <td>${group.nonCompliantResources}</td>
+        </tr>`;
+      }).join("");
+
+      select.innerHTML = state.resourceGroups.map((group) => {
+        return `<option value="${escapeAttribute(group.name)}">${escapeHtml(group.name)}</option>`;
+      }).join("");
+    }
+
+    function renderDashboard(payload) {
+      const mode = payload.mode || "unknown";
+      const summary = payload.policySummary || {};
+      const groups = Array.isArray(payload.resourceGroups) ? payload.resourceGroups : [];
+      const commands = payload.cliCommands || {};
+      const generated = payload.generatedAtUtc || new Date().toISOString();
+
+      document.getElementById("status").className = "status";
+      document.getElementById("status").firstElementChild.textContent = `Generated ${generated}; subscription ${payload.subscription?.name || payload.subscription?.id || "n/a"}`;
+      setText("modePill", `mode: ${mode}`);
+      setText("resourceCount", getSummaryValue(summary, "nonCompliantResources").toString());
+      setText("policyCount", getSummaryValue(summary, "nonCompliantPolicies").toString());
+      setText("assignmentCount", getSummaryValue(summary, "policyAssignments").toString());
+      setText("resourceGroupCommand", commands.resourceGroups || "az group list -o json");
+      setText("policySummaryCommand", commands.policySummary || "az policy state summarize -o json");
+      setText("remediationCommand", commands.remediation || "az policy remediation create ...");
+      setText("remediationHint", payload.warning || (payload.azureCliEnabled ? "Azure CLI execution is enabled." : ""));
+      renderResourceGroups(groups);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#096;");
+    }
+
+    async function loadCompliance() {
+      const status = document.getElementById("status");
+      if (!state.apiBaseUrl) {
+        status.className = "status error";
+        status.firstElementChild.textContent = "Missing HELLO_PORTAL_CONFIG.apiBaseUrl.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`${state.apiBaseUrl}/compliance/dashboard`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        renderDashboard(await response.json());
+      } catch (error) {
+        status.className = "status error";
+        status.firstElementChild.textContent = `Compliance dashboard failed: ${error.message}`;
+      }
+    }
+
+    async function submitRemediation(event) {
+      event.preventDefault();
+      const button = document.getElementById("remediationButton");
+      const output = document.getElementById("remediationResult");
+      const form = new FormData(event.currentTarget);
+      const payload = {
+        resourceGroup: form.get("resourceGroup"),
+        policyAssignmentId: form.get("policyAssignmentId"),
+        remediationName: form.get("remediationName")
+      };
+
+      button.disabled = true;
+      output.textContent = "Submitting remediation task...";
+
+      try {
+        const response = await fetch(`${state.apiBaseUrl}/compliance/remediation`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const json = await response.json();
+        if (!response.ok) {
+          throw new Error(json.error || `HTTP ${response.status}`);
+        }
+        output.textContent = JSON.stringify(json, null, 2);
+      } catch (error) {
+        output.textContent = `Remediation request failed: ${error.message}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    document.getElementById("remediationForm").addEventListener("submit", submitRemediation);
+    loadCompliance();
+  </script>
+</body>
+</html>

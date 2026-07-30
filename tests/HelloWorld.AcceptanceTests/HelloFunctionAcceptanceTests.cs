@@ -14,6 +14,7 @@ public sealed class AcceptanceCollectionDefinition { }
 public class HelloFunctionAcceptanceTests
 {
     private readonly HelloFunction _sut = new(NullLogger<HelloFunction>.Instance);
+    private readonly ComplianceFunction _compliance = new(NullLogger<ComplianceFunction>.Instance);
 
     [Fact]
     public async Task Hello_returns_a_personalized_message_from_the_query_string()
@@ -121,6 +122,49 @@ public class HelloFunctionAcceptanceTests
         finally
         {
             Environment.SetEnvironmentVariable("STORAGE_CONNECTION_STRING", original);
+        }
+    }
+
+    [Fact]
+    public async Task ComplianceDashboard_returns_demo_data_when_azure_cli_is_disabled()
+    {
+        var original = Environment.GetEnvironmentVariable("AZURE_CLI_ENABLE");
+        Environment.SetEnvironmentVariable("AZURE_CLI_ENABLE", null);
+
+        try
+        {
+            var result = await _compliance.ComplianceDashboard(CreateRequest());
+
+            var payload = ReadJson(Assert.IsType<OkObjectResult>(result).Value);
+            Assert.Equal("demo", payload.RootElement.GetProperty("mode").GetString());
+            Assert.False(payload.RootElement.GetProperty("azureCliEnabled").GetBoolean());
+            Assert.True(payload.RootElement.GetProperty("resourceGroups").GetArrayLength() >= 1);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("AZURE_CLI_ENABLE", original);
+        }
+    }
+
+    [Fact]
+    public async Task ComplianceRemediation_returns_demo_queue_response_when_azure_cli_is_disabled()
+    {
+        var original = Environment.GetEnvironmentVariable("AZURE_CLI_ENABLE");
+        Environment.SetEnvironmentVariable("AZURE_CLI_ENABLE", null);
+
+        try
+        {
+            var result = await _compliance.ComplianceRemediation(CreateRequest(
+                "POST",
+                body: "{\"resourceGroup\":\"rg-lantrnfx-dev\",\"policyAssignmentId\":\"demo-assignment\"}"));
+
+            var payload = ReadJson(Assert.IsType<OkObjectResult>(result).Value);
+            Assert.Equal("demo-queued", payload.RootElement.GetProperty("status").GetString());
+            Assert.Contains("az policy remediation create", payload.RootElement.GetProperty("command").GetString());
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("AZURE_CLI_ENABLE", original);
         }
     }
 
