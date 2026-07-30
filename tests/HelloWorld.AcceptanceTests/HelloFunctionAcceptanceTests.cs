@@ -60,8 +60,8 @@ public class HelloFunctionAcceptanceTests
     [Fact]
     public async Task StorageSummary_returns_a_configuration_error_when_storage_is_missing()
     {
-        var original = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-        Environment.SetEnvironmentVariable("AzureWebJobsStorage", null);
+        var original = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");
+        Environment.SetEnvironmentVariable("STORAGE_CONNECTION_STRING", null);
 
         try
         {
@@ -71,11 +71,11 @@ public class HelloFunctionAcceptanceTests
             Assert.Equal(500, payload.StatusCode);
 
             var json = ReadJson(payload.Value);
-            Assert.Equal("AzureWebJobsStorage is not configured.", json.RootElement.GetProperty("error").GetString());
+            Assert.Equal("STORAGE_CONNECTION_STRING is not configured.", json.RootElement.GetProperty("error").GetString());
         }
         finally
         {
-            Environment.SetEnvironmentVariable("AzureWebJobsStorage", original);
+            Environment.SetEnvironmentVariable("STORAGE_CONNECTION_STRING", original);
         }
     }
 
@@ -105,8 +105,8 @@ public class HelloFunctionAcceptanceTests
     [Fact]
     public async Task StorageReportLinks_returns_a_configuration_error_when_storage_is_missing()
     {
-        var original = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-        Environment.SetEnvironmentVariable("AzureWebJobsStorage", null);
+        var original = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");
+        Environment.SetEnvironmentVariable("STORAGE_CONNECTION_STRING", null);
 
         try
         {
@@ -116,11 +116,11 @@ public class HelloFunctionAcceptanceTests
             Assert.Equal(500, payload.StatusCode);
 
             var json = ReadJson(payload.Value);
-            Assert.Equal("AzureWebJobsStorage is not configured.", json.RootElement.GetProperty("error").GetString());
+            Assert.Equal("STORAGE_CONNECTION_STRING is not configured.", json.RootElement.GetProperty("error").GetString());
         }
         finally
         {
-            Environment.SetEnvironmentVariable("AzureWebJobsStorage", original);
+            Environment.SetEnvironmentVariable("STORAGE_CONNECTION_STRING", original);
         }
     }
 
