@@ -1,6 +1,9 @@
 name: Deploy to dev
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       subscription:
@@ -21,6 +24,7 @@ permissions:
 
 env:
   ENVIRONMENT: dev
+  PROJECT_NAME: lantern
   REGION_CODE: usw2
   INSTANCE_NUMBER: "001"
   AZURE_CLIENT_ID: 560461b1-6b93-4d8e-8d60-b84e38df35ef
@@ -54,7 +58,8 @@ jobs:
           $derivedProject = ($repoName -replace '[^a-z0-9]', '')
           if ($derivedProject.Length -gt 8) { $derivedProject = $derivedProject.Substring(0, 8) }
 
-          $project = "${{ inputs.projectName }}".Trim().ToLowerInvariant()
+          $project = "${{ github.event.inputs.projectName }}".Trim().ToLowerInvariant()
+          if ([string]::IsNullOrWhiteSpace($project)) { $project = "${{ env.PROJECT_NAME }}".Trim().ToLowerInvariant() }
           if ([string]::IsNullOrWhiteSpace($project)) { $project = $derivedProject }
           if ($project -notmatch '^[a-z0-9]{2,8}$') {
             throw "projectName must resolve to ^[a-z0-9]{2,8}$ (got '$project')"

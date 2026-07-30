@@ -7,6 +7,7 @@ development deployment flow in `green-lantern`.
 
 - Scope the `Deploy to dev` workflow to the `dev` environment
 - Keep the dev deployment target explicit in the repository
+- Support trunk-based deploys from `main`
 - Make the workflow-to-environment mapping easy to find in git
 
 ## Workflow mapping

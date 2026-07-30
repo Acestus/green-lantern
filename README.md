@@ -4,14 +4,16 @@ A template repository for .NET Azure Functions following Cloud Adoption Framewor
 
 ## Quickstart (GitHub Action deploy to dev)
 
-Use this when you want one-click deployment from GitHub Actions.
+Use this when you want push-to-deploy from GitHub Actions.
 
-1. Open **Actions** in this repository.
-2. Select **Deploy to dev** (`.github/workflows/deploy-to-dev.yaml`).
-3. Click **Run workflow**.
-4. Set:
-   - `projectName` (example: `hello02`)
-5. Run and monitor until all deploy/build/publish steps are green.
+1. Push to `main`.
+2. Open **Actions** in this repository if you want to watch the run.
+3. Monitor until all deploy/build/publish steps are green.
+
+For manual runs, open **Actions**, select **Deploy to dev**
+(`.github/workflows/deploy-to-dev.yaml`), and click **Run workflow**.
+The default `projectName` for this repo is `lantern`.
+This note exists to give the push-based dev trigger a fresh change to pick up.
 
 The GitHub Action workflows are pinned to the `acestus` subscription
 (`df64929f-810d-4176-8097-35cd05cae10d`) and use OIDC with the managed identity
@@ -177,8 +179,10 @@ Use one of the two manual button workflows:
 - `.github/workflows/deploy-to-dev.yaml`
 - `.github/workflows/deploy-to-prd.yaml`
 
-Both accept:
-- `projectName`
+The dev workflow now also runs automatically on pushes to `main`.
+
+Both workflows accept:
+- `projectName` for manual runs, defaulting to `lantern` in dev
 
 Both workflows deploy only to the `acestus` subscription
 (`df64929f-810d-4176-8097-35cd05cae10d`) and authenticate with OIDC through the
