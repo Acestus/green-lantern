@@ -88,6 +88,9 @@ green-lantern/
 │   ├── HelloFunction.cs
 │   ├── host.json
 │   └── local.settings.json
+├── tests/                          # Unit and acceptance tests
+│   ├── HelloWorld.UnitTests/
+│   └── HelloWorld.AcceptanceTests/
 ├── infrastructure/                 # Bicep IaC templates
 │   ├── main.bicep
 │   ├── main.dev.bicepparam
@@ -159,6 +162,10 @@ Deploy function apps:
 ```powershell
 ./scripts/deploy-code.ps1 -Environment dev
 ```
+
+### Tests
+
+The `Tests` GitHub Actions workflow runs unit and acceptance tests in parallel on pushes to `main` and on pull requests.
 
 ## Naming Conventions
 

@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout green-lantern repo
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Run unit tests
+        shell: bash
+        run: dotnet test tests/HelloWorld.UnitTests/HelloWorld.UnitTests.csproj --configuration Release
+
+  acceptance-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout green-lantern repo
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Run acceptance tests
+        shell: bash
+        run: dotnet test tests/HelloWorld.AcceptanceTests/HelloWorld.AcceptanceTests.csproj --configuration Release

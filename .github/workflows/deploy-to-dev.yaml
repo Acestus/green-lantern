@@ -171,7 +171,7 @@ jobs:
           echo "     • Bicep parameter mismatch for projectName/target subscription"
           echo "     • Validate deployment: az deployment group what-if --resource-group ${{ needs.prepare.outputs.resource_group }} --template-file infrastructure/main.bicep --parameters ${{ steps.infra.outputs.param_file }}"
 
-  upload-storage-reports:
+  configure-observability:
     runs-on: ubuntu-latest
     environment: dev
     needs:
@@ -259,62 +259,6 @@ jobs:
               --source "$tmp_reports_dir" \
               --overwrite true \
               --output table
-
-  sync-appinsights-key:
-    runs-on: ubuntu-latest
-    environment: dev
-    needs:
-      - prepare
-      - deploy-infra
-    if: ${{ always() && needs.prepare.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') }}
-
-    steps:
-      - name: Azure login (OIDC)
-        uses: azure/login@v3
-        with:
-          client-id: ${{ env.AZURE_CLIENT_ID }}
-          tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
-
-      - name: Ensure App Insights API key and function setting
-        uses: azure/CLI@v3
-        with:
-          azcliversion: latest
-          inlineScript: |
-            set -euo pipefail
-            rg="${{ needs.prepare.outputs.resource_group }}"
-            appi_name="appi-${{ needs.prepare.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
-            function_name="func-${{ needs.prepare.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
-
-            api_key=$(az functionapp config appsettings list \
-              --name "$function_name" \
-              --resource-group "$rg" \
-              --query "[?name=='APPINSIGHTS_API_KEY'] | [0].value" -o tsv)
-
-            if [ "$api_key" = "None" ]; then
-              api_key=""
-            fi
-
-            if [ -z "$api_key" ]; then
-              key_name="hello-portal-query-key-${GITHUB_RUN_ID:-manual}-$(date +%s)"
-              api_key=$(az monitor app-insights api-key create \
-                --resource-group "$rg" \
-                --app "$appi_name" \
-                --api-key "$key_name" \
-                --read-properties ReadTelemetry \
-                --query apiKey -o tsv)
-            fi
-
-            app_id=$(az monitor app-insights component show \
-              --resource-group "$rg" \
-              --app "$appi_name" \
-              --query appId -o tsv)
-
-            az functionapp config appsettings set \
-              --name "$function_name" \
-              --resource-group "$rg" \
-              --settings "APPINSIGHTS_API_KEY=$api_key" "APPINSIGHTS_APP_ID=$app_id" \
-              --output none
 
   deploy-function:
     runs-on: ubuntu-latest
@@ -474,11 +418,10 @@ jobs:
     needs:
       - prepare
       - deploy-infra
+      - configure-observability
       - deploy-function
       - deploy-swa
-      - upload-storage-reports
-      - sync-appinsights-key
-    if: ${{ always() && needs.prepare.result == 'success' && needs.deploy-function.result == 'success' && needs.deploy-swa.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') && (needs.upload-storage-reports.result == 'success' || needs.upload-storage-reports.result == 'skipped') && (needs.sync-appinsights-key.result == 'success' || needs.sync-appinsights-key.result == 'skipped') }}
+    if: ${{ always() && needs.prepare.result == 'success' && needs.configure-observability.result == 'success' && needs.deploy-function.result == 'success' && needs.deploy-swa.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') }}
 
     steps:
       - name: Smoke test function health endpoint

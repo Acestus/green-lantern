@@ -28,7 +28,7 @@ public class HelloFunction
     public async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "hello")] HttpRequest req)
     {
-        var correlationId = GetCorrelationId(req);
+        var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("Hello function processed a request. CID:{CorrelationId}", correlationId);
 
         string? name = req.Query["name"];
@@ -64,7 +64,7 @@ public class HelloFunction
     public IActionResult Health(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "health")] HttpRequest req)
     {
-        var correlationId = GetCorrelationId(req);
+        var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         return new OkObjectResult(new
         {
             status = "ok",
@@ -78,7 +78,7 @@ public class HelloFunction
     public async Task<IActionResult> StorageSummary(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "storage/summary")] HttpRequest req)
     {
-        var correlationId = GetCorrelationId(req);
+        var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("Storage summary requested. CID:{CorrelationId}", correlationId);
 
         var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
@@ -188,7 +188,7 @@ public class HelloFunction
     public async Task<IActionResult> AppInsightsSummary(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "observability/appinsights")] HttpRequest req)
     {
-        var correlationId = GetCorrelationId(req);
+        var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("App Insights summary requested. CID:{CorrelationId}", correlationId);
 
         var appId = Environment.GetEnvironmentVariable("APPINSIGHTS_APP_ID");
@@ -228,10 +228,10 @@ requests
                 normalizedPoints.Add(new
                 {
                     timestamp = rowTimestamp,
-                    requests = ToDouble(row["requests"]),
-                    errors = ToDouble(row["errors"]),
-                    avgDurationMs = ToDouble(row["avgDurationMs"]),
-                    p95DurationMs = ToDouble(row["p95DurationMs"])
+                    requests = HelloFunctionHelpers.ToDouble(row["requests"]),
+                    errors = HelloFunctionHelpers.ToDouble(row["errors"]),
+                    avgDurationMs = HelloFunctionHelpers.ToDouble(row["avgDurationMs"]),
+                    p95DurationMs = HelloFunctionHelpers.ToDouble(row["p95DurationMs"])
                 });
             }
 
@@ -262,7 +262,7 @@ requests
     public async Task<IActionResult> StorageReportLinks(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "storage/reports-links")] HttpRequest req)
     {
-        var correlationId = GetCorrelationId(req);
+        var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("Storage report links requested. CID:{CorrelationId}", correlationId);
 
         var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
@@ -297,7 +297,7 @@ requests
 
             links.Add((
                 blob.Name,
-                ToReportTitle(blob.Name),
+                HelloFunctionHelpers.ToReportTitle(blob.Name),
                 sasUri.ToString(),
                 blob.Properties.LastModified?.UtcDateTime.ToString("O", CultureInfo.InvariantCulture)
             ));
@@ -327,7 +327,7 @@ requests
     public async Task<IActionResult> ObservabilityDetails(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "observability/details")] HttpRequest req)
     {
-        var correlationId = GetCorrelationId(req);
+        var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("Observability details requested. CID:{CorrelationId}", correlationId);
 
         var appId = Environment.GetEnvironmentVariable("APPINSIGHTS_APP_ID");
@@ -492,39 +492,4 @@ swa
         return result;
     }
 
-    private static string GetCorrelationId(HttpRequest req)
-    {
-        var header = req.Headers["x-correlation-id"].FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(header))
-        {
-            return header;
-        }
-
-        return Guid.NewGuid().ToString();
-    }
-
-    private static string ToReportTitle(string blobName)
-    {
-        var noExt = blobName.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
-            ? blobName[..^5]
-            : blobName;
-
-        var words = noExt.Replace('-', ' ').Replace('_', ' ');
-        return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(words);
-    }
-
-    private static double ToDouble(object? value)
-    {
-        if (value is null)
-        {
-            return 0;
-        }
-
-        if (double.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-        {
-            return result;
-        }
-
-        return 0;
-    }
 }
