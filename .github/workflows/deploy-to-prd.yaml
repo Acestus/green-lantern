@@ -30,7 +30,7 @@ env:
   SWA_APP_LOCATION: swa/hello-portal
 
 concurrency:
-  group: template-functions-prd-${{ github.ref_name }}
+  group: green-lantern-prd-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       resource_group: ${{ steps.infra.outputs.resource_group }}
 
     steps:
-      - name: Checkout template repo
+      - name: Checkout green-lantern repo
         uses: actions/checkout@v5
 
       - name: Resolve deployment inputs
@@ -127,7 +127,7 @@ jobs:
     needs: deploy-infra
 
     steps:
-      - name: Checkout template repo
+      - name: Checkout green-lantern repo
         uses: actions/checkout@v5
 
       - name: Azure login (OIDC)
@@ -268,7 +268,7 @@ jobs:
       function_hostname: ${{ steps.function-host.outputs.hostname }}
 
     steps:
-      - name: Checkout template repo
+      - name: Checkout green-lantern repo
         uses: actions/checkout@v5
 
       - name: Setup .NET
@@ -315,7 +315,7 @@ jobs:
       swa_hostname: ${{ steps.swa-host.outputs.hostname }}
 
     steps:
-      - name: Checkout template repo
+      - name: Checkout green-lantern repo
         uses: actions/checkout@v5
 
       - name: Azure login (OIDC)

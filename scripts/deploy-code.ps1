@@ -34,7 +34,7 @@ if ([string]::IsNullOrWhiteSpace($CurrentSubscriptionId)) {
 }
 
 if ($CurrentSubscriptionId -ne $TargetSubscriptionId) {
-    throw "This template only deploys to subscription $TargetSubscriptionId (acestus). Current subscription: $CurrentSubscriptionId"
+    throw "This repo only deploys to subscription $TargetSubscriptionId (acestus). Current subscription: $CurrentSubscriptionId"
 }
 
 # Function app to deploy

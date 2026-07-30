@@ -6,8 +6,8 @@ param region = 'usw2'
 param instanceNumber = '001'
 
 param tags = {
-  ManagedBy: 'https://github.com/Acestus/template-functions'
-  CreatedBy: '''template-owner'''
+  ManagedBy: 'https://github.com/Acestus/green-lantern'
+  CreatedBy: '''green-lantern-owner'''
   Environment: 'Development'
   Subscription: 'acestus'
   Project: 'Azure Functions Template'

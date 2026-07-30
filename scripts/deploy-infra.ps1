@@ -39,7 +39,7 @@ if (-not $CurrentContext) {
 }
 
 if ($CurrentContext.Subscription.Id -ne $TargetSubscriptionId) {
-    throw "This template only deploys to subscription $TargetSubscriptionId (acestus). Current subscription: $($CurrentContext.Subscription.Id)"
+    throw "This repo only deploys to subscription $TargetSubscriptionId (acestus). Current subscription: $($CurrentContext.Subscription.Id)"
 }
 
 Write-Host "Deploying infrastructure for environment: $Environment" -ForegroundColor Cyan
@@ -53,7 +53,7 @@ if (-not $rg) {
     New-AzResourceGroup -Name $ResourceGroupName -Location 'westus2' -Tags @{
         Environment = $Environment
         Project     = 'Azure Functions Template'
-        ManagedBy   = 'https://github.com/Acestus/template-functions-dotnet'
+        ManagedBy   = 'https://github.com/Acestus/green-lantern'
     }
 }
 

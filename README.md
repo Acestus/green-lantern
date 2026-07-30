@@ -1,4 +1,4 @@
-# Azure Functions Template - .NET
+# Green Lantern - .NET Azure Functions Template
 
 A template repository for .NET Azure Functions following Cloud Adoption Framework (CAF) naming conventions and Infrastructure as Code best practices.
 
@@ -16,6 +16,8 @@ Use this when you want one-click deployment from GitHub Actions.
 The GitHub Action workflows are pinned to the `acestus` subscription
 (`df64929f-810d-4176-8097-35cd05cae10d`) and use OIDC with the managed identity
 `/subscriptions/df64929f-810d-4176-8097-35cd05cae10d/resourceGroups/rg-mgmt-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/umi-mgmt-dev-scus-ctl`.
+The `Deploy to dev` workflow runs in the GitHub Environment `dev`, which is
+documented in [`.github/environments/dev.md`](.github/environments/dev.md).
 
 ## Quickstart (Contributor role)
 
@@ -77,7 +79,7 @@ At minimum, your identity needs:
 ## Repository Structure
 
 ```
-template-functions-dotnet/
+green-lantern/
 ├── hello-world/                    # Hello World function app
 │   ├── HelloWorld.csproj
 │   ├── Program.cs

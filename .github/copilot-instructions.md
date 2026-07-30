@@ -4,7 +4,7 @@ This document provides guidelines for AI assistants working with this repository
 
 ## Repository Overview
 
-This is a .NET Azure Functions template repository with one function app:
+This is a .NET Azure Functions repository with one function app:
 - **hello-world**: Simple HTTP trigger greeting function
 
 ## Project Conventions
@@ -26,7 +26,7 @@ This is a .NET Azure Functions template repository with one function app:
 All Azure resources should include these tags:
 ```bicep
 tags = {
-  ManagedBy: 'https://github.com/Acestus/template-functions-dotnet'
+  ManagedBy: 'https://github.com/Acestus/green-lantern'
   CreatedBy: '{username}'
   Environment: '{Development|Production}'
   Subscription: '{subscription-name}'
@@ -203,6 +203,8 @@ $runningJobs | Wait-Job | Receive-Job
   files already include the managed identity client ID and tenant ID.
 - Target subscription: `acestus` (`df64929f-810d-4176-8097-35cd05cae10d`)
 - `RESOURCE_GROUP_NAME`: Target resource group
+- The `dev` GitHub Environment is documented in
+  [`.github/environments/dev.md`](./environments/dev.md).
 
 ## Code Review Conventions
 
