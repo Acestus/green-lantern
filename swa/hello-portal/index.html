@@ -34,6 +34,25 @@
       padding: 12px;
       margin: 0 0 16px;
     }
+    .feature-link {
+      display: block;
+      text-decoration: none;
+      background: #fff;
+      border: 2px solid #107c10;
+      border-radius: 8px;
+      color: #323130;
+      padding: 14px 16px;
+      margin: 0 0 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .feature-link strong {
+      color: #107c10;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .feature-link span {
+      color: #605e5c;
+    }
     .nav {
       display: flex;
       gap: 10px;
@@ -83,6 +102,11 @@
   <div class="wrap">
     <h1 id="portalTitle">Project Static Web App</h1>
     <p class="subtitle">This portal is published by the deploy-to-dev workflow.</p>
+
+    <a class="feature-link" href="/lake-cities-guide.html">
+      <strong>Latest guide: Lake Cities Travel Guide</strong>
+      <span>Seasonal things to do around Hickory Creek, Corinth, and Lake Dallas.</span>
+    </a>
 
     <div class="nav">
       <a href="/index.html">Home</a>
