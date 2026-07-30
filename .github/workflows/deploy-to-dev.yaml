@@ -24,7 +24,7 @@ permissions:
 
 env:
   ENVIRONMENT: dev
-  PROJECT_NAME: lantern
+  PROJECT_NAME: lanternfx
   REGION_CODE: usw2
   INSTANCE_NUMBER: "001"
   AZURE_CLIENT_ID: 560461b1-6b93-4d8e-8d60-b84e38df35ef
