@@ -81,10 +81,10 @@ public class HelloFunction
         var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("Storage summary requested. CID:{CorrelationId}", correlationId);
 
-        var connectionString = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");
+        var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return new ObjectResult(new { error = "STORAGE_CONNECTION_STRING is not configured." }) { StatusCode = 500 };
+            return new ObjectResult(new { error = "AzureWebJobsStorage is not configured." }) { StatusCode = 500 };
         }
 
         var containerClient = new BlobContainerClient(connectionString, "samples");
@@ -265,10 +265,10 @@ requests
         var correlationId = HelloFunctionHelpers.GetCorrelationId(req);
         _logger.LogInformation("Storage report links requested. CID:{CorrelationId}", correlationId);
 
-        var connectionString = Environment.GetEnvironmentVariable("STORAGE_CONNECTION_STRING");
+        var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            return new ObjectResult(new { error = "STORAGE_CONNECTION_STRING is not configured." }) { StatusCode = 500 };
+            return new ObjectResult(new { error = "AzureWebJobsStorage is not configured." }) { StatusCode = 500 };
         }
 
         var containerClient = new BlobContainerClient(connectionString, "reports");
