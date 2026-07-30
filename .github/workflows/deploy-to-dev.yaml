@@ -311,6 +311,9 @@ jobs:
               --name "func-${{ needs.prepare.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
               --resource-group "${{ needs.prepare.outputs.resource_group }}" \
               --query defaultHostName -o tsv)
+            if [ -z "$HOSTNAME" ]; then
+              HOSTNAME="func-${{ needs.prepare.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}.azurewebsites.net"
+            fi
             echo "hostname=$HOSTNAME" >> "$GITHUB_OUTPUT"
 
   deploy-swa:
