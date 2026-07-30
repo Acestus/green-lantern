@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homeschool Curriculum Progress Demo</title>
+  <meta name="description" content="A demo homeschool dashboard for Charlotte Mason curriculum progress, living book lists, and a local reading progress tracker.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #25312d;
+      --muted: #637069;
+      --paper: #fbf7ed;
+      --paper-deep: #efe2c3;
+      --sage: #5d7b66;
+      --sage-dark: #2f5542;
+      --navy: #253a5a;
+      --gold: #c89745;
+      --rose: #9d4f45;
+      --line: #dfd3b8;
+      --white: #fffdf8;
+      --shadow: 0 18px 42px rgba(37, 49, 45, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    a { color: inherit; }
+    .topline {
+      background: var(--navy);
+      color: #fff;
+      padding: 9px 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .nav {
+      background: rgba(255, 253, 248, 0.96);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-inner,
+    .hero-inner,
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .nav-inner {
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--sage-dark);
+      font-size: 1.18rem;
+      font-weight: 900;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, transparent 45%, rgba(255,255,255,0.6) 45% 55%, transparent 55%),
+        linear-gradient(135deg, var(--sage), var(--gold));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.45);
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .links a {
+      text-decoration: none;
+      color: var(--navy);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .links a:hover { background: #eef3ed; }
+    .hero {
+      position: relative;
+      min-height: 520px;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      background: var(--navy);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(24, 37, 55, 0.9), rgba(24, 37, 55, 0.55) 48%, rgba(24, 37, 55, 0.1)),
+        url("./assets/images/homeschool-library-hero.png") center/cover no-repeat;
+    }
+    .hero-inner {
+      position: relative;
+      color: #fff;
+      padding: 76px 0 52px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,0.26);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.13);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    h1 {
+      max-width: 720px;
+      margin: 14px 0 14px;
+      font-size: 4.8rem;
+      line-height: 0.96;
+    }
+    .lede {
+      max-width: 690px;
+      margin: 0 0 22px;
+      color: rgba(255,255,255,0.9);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      font: inherit;
+    }
+    .button.primary {
+      background: var(--gold);
+      color: #1f261f;
+    }
+    .button.secondary {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.38);
+    }
+    main { padding: 34px 0 72px; }
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: -76px 0 34px;
+      position: relative;
+      z-index: 2;
+    }
+    .metric,
+    .panel,
+    .child-card,
+    .book-card,
+    .tracker {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .metric {
+      padding: 16px;
+      min-height: 116px;
+    }
+    .metric strong {
+      display: block;
+      color: var(--sage-dark);
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      margin: 28px 0 14px;
+    }
+    h2 {
+      margin: 0;
+      color: var(--sage-dark);
+      font-size: 2.15rem;
+    }
+    .section-note {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 720px;
+      line-height: 1.6;
+    }
+    .child-grid,
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .child-card {
+      padding: 18px;
+    }
+    .child-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .child-card h3,
+    .book-card h3,
+    .panel h3 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 1.12rem;
+    }
+    .form {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .ring {
+      width: 74px;
+      height: 74px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        conic-gradient(var(--sage) var(--progress), #eadfc9 0),
+        #eadfc9;
+      color: var(--sage-dark);
+      font-weight: 900;
+      box-shadow: inset 0 0 0 10px var(--white);
+    }
+    .lesson-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .lesson-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: 14px;
+    }
+    .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 2px solid var(--sage);
+      background: #eef5ef;
+      position: relative;
+      flex: 0 0 auto;
+    }
+    .done .check::after {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid var(--sage-dark);
+      border-bottom: 2px solid var(--sage-dark);
+      transform: rotate(-45deg);
+      left: 3px;
+      top: 4px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .panel {
+      padding: 18px;
+    }
+    .rhythm {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .rhythm-row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+    .time {
+      color: var(--rose);
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .rhythm-row strong {
+      display: block;
+      color: var(--ink);
+    }
+    .rhythm-row span {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .book-card {
+      overflow: hidden;
+    }
+    .book-band {
+      min-height: 92px;
+      background:
+        linear-gradient(135deg, rgba(37, 58, 90, 0.92), rgba(93, 123, 102, 0.86)),
+        var(--sage);
+      display: flex;
+      align-items: end;
+      padding: 14px;
+      color: #fff;
+    }
+    .book-card:nth-child(2) .book-band {
+      background: linear-gradient(135deg, #7b4f36, #c89745);
+    }
+    .book-card:nth-child(3) .book-band {
+      background: linear-gradient(135deg, #253a5a, #9d4f45);
+    }
+    .book-body {
+      padding: 14px;
+    }
+    .book-body p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .tag {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: var(--sage-dark);
+      background: #f8f1de;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .tracker {
+      overflow: hidden;
+    }
+    .tracker-head {
+      padding: 18px;
+      background: var(--sage-dark);
+      color: #fff;
+    }
+    .tracker-head h2 { color: #fff; }
+    .tracker-body {
+      padding: 18px;
+    }
+    .entry-form {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 0.8fr 0.8fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    input,
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 14px;
+    }
+    th,
+    td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: var(--navy);
+      background: #f5edd9;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-pill {
+      display: inline-flex;
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #eef3ed;
+      color: var(--sage-dark);
+      font-weight: 900;
+      font-size: 12px;
+    }
+    .delete {
+      border: 1px solid #e6c6c1;
+      background: #fff7f6;
+      color: var(--rose);
+      border-radius: 6px;
+      font: inherit;
+      font-weight: 800;
+      padding: 6px 8px;
+      cursor: pointer;
+    }
+    .footnote {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 12px 0 0;
+    }
+    @media (max-width: 940px) {
+      .nav-inner,
+      .section-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .overview,
+      .child-grid,
+      .book-grid,
+      .layout,
+      .entry-form {
+        grid-template-columns: 1fr;
+      }
+      .overview { margin-top: 18px; }
+      .hero { min-height: 590px; }
+      h1 { font-size: 2.6rem; }
+      h2 { font-size: 1.65rem; }
+      .hero::before {
+        background:
+          linear-gradient(180deg, rgba(24, 37, 55, 0.88), rgba(24, 37, 55, 0.52)),
+          url("./assets/images/homeschool-library-hero.png") center/cover no-repeat;
+      }
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr {
+        display: block;
+      }
+      thead { display: none; }
+      tr {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        overflow: hidden;
+      }
+      td {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 10px;
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--navy);
+        font-weight: 900;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topline">Demo dashboard: curriculum progress, Charlotte Mason shelves, and a local reading log</div>
+
+  <nav class="nav" aria-label="Primary navigation">
+    <div class="nav-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>Weeks-Balconi Homeschool</div>
+      <div class="links">
+        <a href="/index.html">Home</a>
+        <a href="#progress">Progress</a>
+        <a href="#books">Book Lists</a>
+        <a href="#reading-log">Reading Log</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">Charlotte Mason inspired</span>
+      <h1>A living-books command center for the school year.</h1>
+      <p class="lede">A polished homeschool demo for tracking lessons, building a Charlotte Mason book shelf, logging family reading, and showing weekly progress without making the site feel like institutional school software.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#reading-log">Open reading log</a>
+        <a class="button secondary" href="#books">Browse book lists</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="overview" aria-label="Weekly summary">
+      <div class="metric"><strong id="booksTotal">0</strong><span>Books in the local reading database</span></div>
+      <div class="metric"><strong id="pagesTotal">0</strong><span>Pages logged across family reading</span></div>
+      <div class="metric"><strong>82%</strong><span>Average weekly curriculum progress</span></div>
+      <div class="metric"><strong>5</strong><span>Core living-book shelves in rotation</span></div>
+    </section>
+
+    <section id="progress" aria-labelledby="progress-heading">
+      <div class="section-head">
+        <div>
+          <h2 id="progress-heading">Curriculum progress</h2>
+          <p class="section-note">Mock progress cards for lessons, habits, and narrations. The real version could connect to Apple Reminders, Notion, or a small database API.</p>
+        </div>
+      </div>
+
+      <div class="child-grid">
+        <article class="child-card">
+          <div class="child-top">
+            <div><h3>Caroline</h3><div class="form">Form I - reading fluency</div></div>
+            <div class="ring" style="--progress: 88%;">88%</div>
+          </div>
+          <ul class="lesson-list">
+            <li class="done"><span class="check"></span>Reading lesson and narration</li>
+            <li class="done"><span class="check"></span>Copywork and recitation</li>
+            <li><span class="check"></span>Nature notebook sketch</li>
+          </ul>
+        </article>
+        <article class="child-card">
+          <div class="child-top">
+            <div><h3>Dominic</h3><div class="form">Form I - phonics and numbers</div></div>
+            <div class="ring" style="--progress: 74%;">74%</div>
+          </div>
+          <ul class="lesson-list">
+            <li class="done"><span class="check"></span>100 Easy Lessons</li>
+            <li><span class="check"></span>Math counters</li>
+            <li class="done"><span class="check"></span>Picture narration</li>
+          </ul>
+        </article>
+        <article class="child-card">
+          <div class="child-top">
+            <div><h3>Bartholomew</h3><div class="form">Early years - habit and story</div></div>
+            <div class="ring" style="--progress: 66%;">66%</div>
+          </div>
+          <ul class="lesson-list">
+            <li class="done"><span class="check"></span>Read-aloud basket</li>
+            <li><span class="check"></span>Outdoor observation</li>
+            <li class="done"><span class="check"></span>Memory verse practice</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="layout" aria-label="Weekly rhythm and portfolio">
+      <article class="panel">
+        <h3>Daily rhythm</h3>
+        <div class="rhythm">
+          <div class="rhythm-row"><div class="time">8:30 AM</div><div><strong>Morning Basket</strong><span>Prayer, hymn, poem, Scripture memory, and one short read-aloud.</span></div></div>
+          <div class="rhythm-row"><div class="time">9:15 AM</div><div><strong>Skill Lessons</strong><span>Phonics, math, copywork, and short focused one-on-one lessons.</span></div></div>
+          <div class="rhythm-row"><div class="time">10:30 AM</div><div><strong>Living Books</strong><span>History, geography, literature, and oral narration while attention is fresh.</span></div></div>
+          <div class="rhythm-row"><div class="time">1:30 PM</div><div><strong>Nature + Handicrafts</strong><span>Walks, sketching, practical work, music, and quiet reading.</span></div></div>
+        </div>
+      </article>
+      <article class="panel">
+        <h3>Portfolio notes</h3>
+        <div class="rhythm">
+          <div class="rhythm-row"><div class="time">Narration</div><div><strong>History retelling</strong><span>Caroline gave a clear narration from a Roman history reading and remembered two names without prompting.</span></div></div>
+          <div class="rhythm-row"><div class="time">Habit</div><div><strong>Attention practice</strong><span>Dominic stayed with his reading lesson for ten minutes and recovered quickly after a hard word.</span></div></div>
+          <div class="rhythm-row"><div class="time">Nature</div><div><strong>Backyard observation</strong><span>Bartholomew noticed the change in the pecan leaves and added color to the family notebook.</span></div></div>
+        </div>
+      </article>
+    </section>
+
+    <section id="books" aria-labelledby="books-heading">
+      <div class="section-head">
+        <div>
+          <h2 id="books-heading">Charlotte Mason living-book shelves</h2>
+          <p class="section-note">Example book lists organized by use case. The real version could include availability, age band, current chapter, and links to library or public-domain editions.</p>
+        </div>
+      </div>
+
+      <div class="book-grid">
+        <article class="book-card">
+          <div class="book-band"><h3>Form I Foundations</h3></div>
+          <div class="book-body">
+            <p>Short, concrete books for early narration, habit building, and family read-aloud rhythm.</p>
+            <div class="tag-row">
+              <span class="tag">Aesop</span>
+              <span class="tag">Burgess</span>
+              <span class="tag">Milne</span>
+              <span class="tag">Mother Goose</span>
+            </div>
+          </div>
+        </article>
+        <article class="book-card">
+          <div class="book-band"><h3>History + Geography</h3></div>
+          <div class="book-body">
+            <p>Living narratives that make people, places, and maps feel memorable instead of abstract.</p>
+            <div class="tag-row">
+              <span class="tag">Our Island Story</span>
+              <span class="tag">D'Aulaire</span>
+              <span class="tag">Landmark</span>
+              <span class="tag">Maps</span>
+            </div>
+          </div>
+        </article>
+        <article class="book-card">
+          <div class="book-band"><h3>Nature Study</h3></div>
+          <div class="book-body">
+            <p>Field guides, seasonal stories, and observation prompts for a notebook-centered habit.</p>
+            <div class="tag-row">
+              <span class="tag">Comstock</span>
+              <span class="tag">Birds</span>
+              <span class="tag">Trees</span>
+              <span class="tag">Weather</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="reading-log" class="tracker" aria-labelledby="reading-heading">
+      <div class="tracker-head">
+        <h2 id="reading-heading">Reading progress sheet</h2>
+        <p class="section-note" style="color: rgba(255,255,255,0.86);">A working demo backed by local browser storage. Add books, update status, and refresh the page without losing the mock data.</p>
+      </div>
+      <div class="tracker-body">
+        <form class="entry-form" id="bookForm">
+          <label>Book
+            <input id="bookTitle" name="bookTitle" type="text" placeholder="The Burgess Bird Book" required>
+          </label>
+          <label>Child
+            <select id="bookChild" name="bookChild">
+              <option>Family</option>
+              <option>Caroline</option>
+              <option>Dominic</option>
+              <option>Bartholomew</option>
+              <option>Mary Ellen</option>
+            </select>
+          </label>
+          <label>Status
+            <select id="bookStatus" name="bookStatus">
+              <option>Reading</option>
+              <option>Queued</option>
+              <option>Finished</option>
+            </select>
+          </label>
+          <label>Pages
+            <input id="bookPages" name="bookPages" type="number" min="0" step="1" placeholder="42">
+          </label>
+          <button class="button primary" type="submit">Add</button>
+        </form>
+
+        <table aria-label="Reading progress">
+          <thead>
+            <tr>
+              <th>Book</th>
+              <th>Reader</th>
+              <th>Status</th>
+              <th>Pages</th>
+              <th>Updated</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="bookTable"></tbody>
+        </table>
+        <p class="footnote">Demo data stays in this browser through <code>localStorage</code>. A production version could move the same shape into Azure Table Storage or a small API database.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const storageKey = "homeschoolReadingLog.v1";
+    const starterBooks = [
+      { title: "The Burgess Bird Book", child: "Family", status: "Reading", pages: 68, updated: "2026-07-30" },
+      { title: "Aesop's Fables", child: "Dominic", status: "Reading", pages: 24, updated: "2026-07-29" },
+      { title: "Paddle-to-the-Sea", child: "Caroline", status: "Queued", pages: 0, updated: "2026-07-28" },
+      { title: "Handbook of Nature Study", child: "Family", status: "Reading", pages: 112, updated: "2026-07-27" }
+    ];
+
+    function loadBooks() {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) {
+        localStorage.setItem(storageKey, JSON.stringify(starterBooks));
+        return starterBooks;
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : starterBooks;
+      } catch {
+        return starterBooks;
+      }
+    }
+
+    function saveBooks(books) {
+      localStorage.setItem(storageKey, JSON.stringify(books));
+    }
+
+    function renderBooks() {
+      const books = loadBooks();
+      const table = document.getElementById("bookTable");
+      const totalPages = books.reduce((sum, book) => sum + Number(book.pages || 0), 0);
+
+      document.getElementById("booksTotal").textContent = books.length;
+      document.getElementById("pagesTotal").textContent = totalPages;
+
+      table.innerHTML = books.map((book, index) => `
+        <tr>
+          <td data-label="Book"><strong>${escapeHtml(book.title)}</strong></td>
+          <td data-label="Reader">${escapeHtml(book.child)}</td>
+          <td data-label="Status"><span class="status-pill">${escapeHtml(book.status)}</span></td>
+          <td data-label="Pages">${Number(book.pages || 0)}</td>
+          <td data-label="Updated">${escapeHtml(book.updated)}</td>
+          <td data-label="Action"><button class="delete" data-index="${index}" type="button">Remove</button></td>
+        </tr>
+      `).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.getElementById("bookForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const books = loadBooks();
+      const today = new Date().toISOString().slice(0, 10);
+      books.unshift({
+        title: document.getElementById("bookTitle").value.trim(),
+        child: document.getElementById("bookChild").value,
+        status: document.getElementById("bookStatus").value,
+        pages: Number(document.getElementById("bookPages").value || 0),
+        updated: today
+      });
+      saveBooks(books);
+      event.target.reset();
+      renderBooks();
+    });
+
+    document.getElementById("bookTable").addEventListener("click", (event) => {
+      const button = event.target.closest(".delete");
+      if (!button) return;
+
+      const books = loadBooks();
+      books.splice(Number(button.dataset.index), 1);
+      saveBooks(books);
+      renderBooks();
+    });
+
+    renderBooks();
+  </script>
+</body>
+</html>
