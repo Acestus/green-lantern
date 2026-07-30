@@ -134,10 +134,6 @@ resource helloWorldFunctionApp 'Microsoft.Web/sites@2024-11-01' = {
           value: '~4'
         }
         {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'dotnet-isolated'
-        }
-        {
           name: 'AzureWebJobsStorage__accountName'
           value: storageAccount.name
         }
