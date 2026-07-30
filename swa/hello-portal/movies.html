@@ -162,13 +162,14 @@
 <body>
   <div class="wrap">
     <h1>Current Box Office Movies</h1>
-    <p class="subtitle">Live weekend box office data from The Numbers, plus an editorial watch-or-stream meter and a last-year Oscar streaming guide.</p>
+    <p class="subtitle">Weekend box office data from The Numbers, plus an editorial watch-or-stream meter and a 2025 movie streaming guide.</p>
 
     <div class="nav">
       <a href="/index.html">Home</a>
       <a href="/data.html">Data Demo</a>
       <a href="/observability.html">App Insights</a>
       <a href="/disney-magic-food.html">Disney Magic Food</a>
+      <a href="/disney-cruise-line.html">Disney Cruise Line</a>
     </div>
 
     <section class="panel">
@@ -200,7 +201,7 @@
     <section class="panel">
       <div class="panel-head">
         <h2>Worth Seeing in Theaters vs Streaming</h2>
-        <p>This is the opinionated section. The box office is factual; the verdict is the movie-seat equivalent of a thumbs-scale review.</p>
+        <p>This is the opinionated section. The box office is factual; the verdict is a Siskel-and-Ebert-inspired thumbs scale with a deliberately unserious couch-or-cocktail meter.</p>
       </div>
       <div id="recommendGrid" class="recommend-grid">
         <div class="rec-card">
@@ -213,7 +214,7 @@
     <section class="panel">
       <div class="panel-head">
         <h2>Best Movies From Last Year</h2>
-        <p>Oscar winners from the 97th Academy Awards and the best streaming home for each one right now.</p>
+        <p>Oscar winners and major nominees from 2025 films, with the best streaming home for each one right now.</p>
       </div>
       <table aria-label="Last year movie streaming guide">
         <thead>
@@ -226,7 +227,7 @@
         </thead>
         <tbody id="lastYearRows">
           <tr>
-            <td colspan="4" class="meta">Loading last year’s picks...</td>
+            <td colspan="4" class="meta">Loading last year's picks...</td>
           </tr>
         </tbody>
       </table>
@@ -234,14 +235,16 @@
 
     <p class="footer">
       Sources: <a href="https://www.the-numbers.com/weekend-box-office-chart" target="_blank" rel="noopener noreferrer">The Numbers weekend chart</a>,
-      <a href="https://www.oscars.org/oscars/ceremonies/2025" target="_blank" rel="noopener noreferrer">Academy Awards 2025 winners</a>,
-      <a href="https://www.hulu.com/movie/anora-4ea682c1-f3ff-4f56-bc65-f3dd68a4af68" target="_blank" rel="noopener noreferrer">Hulu</a>,
-      <a href="https://www.hbomax.com/movies/brutalist/a56ccde9-e73e-430c-914b-b36af9482fe5" target="_blank" rel="noopener noreferrer">Max</a>,
-      <a href="https://www.amazon.com/Conclave-Edward-Berger/dp/B0DLKMHW18" target="_blank" rel="noopener noreferrer">Prime Video</a>,
-      <a href="https://www.hbomax.com/movies/flow/83df1c2b-db9d-49cd-bf83-9ddbaa7e5e30" target="_blank" rel="noopener noreferrer">Flow on Max</a>.
+      <a href="https://www.oscars.org/oscars/ceremonies/2026" target="_blank" rel="noopener noreferrer">Academy Awards 2026 winners</a>,
+      <a href="https://www.hbomax.com/movies/one-battle-after-another/bebe611d-8178-481a-a4f2-de743b5b135a" target="_blank" rel="noopener noreferrer">One Battle after Another on HBO Max</a>,
+      <a href="https://www.hbomax.com/movies/sinners/2a072173-2bac-43ba-9933-10eba021ed96" target="_blank" rel="noopener noreferrer">Sinners on HBO Max</a>,
+      <a href="https://www.netflix.com/title/81498621" target="_blank" rel="noopener noreferrer">KPop Demon Hunters on Netflix</a>,
+      <a href="https://tv.apple.com/us/movie/f1-the-movie/umc.cmc.3t6dvnnr87zwd4wmvpdx5came" target="_blank" rel="noopener noreferrer">F1 The Movie on Apple TV</a>,
+      <a href="https://www.netflix.com/title/81507921" target="_blank" rel="noopener noreferrer">Frankenstein on Netflix</a>.
     </p>
   </div>
 
+  <script src="./config.js"></script>
   <script>
     function escapeHtml(value) {
       return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -261,7 +264,9 @@
       const currentError = document.getElementById("currentError");
 
       try {
-        const response = await fetch("/api/movies/overview");
+        const cfg = window.HELLO_PORTAL_CONFIG || {};
+        const apiBase = cfg.apiBaseUrl || "/api";
+        const response = await fetch(`${apiBase}/movies/overview`);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
@@ -269,7 +274,7 @@
         const data = await response.json();
         const source = data.source || {};
 
-        chartMeta.textContent = `${source.name || "Source"}: ${source.chartDate || "latest weekend"} • Updated ${data.generatedAtUtc || "just now"}`;
+        chartMeta.textContent = `${source.name || "Source"}: ${source.chartDate || "latest weekend"} - Updated ${data.generatedAtUtc || "just now"}`;
 
         const currentMovies = data.currentMovies || [];
         if (currentMovies.length === 0) {
@@ -282,7 +287,7 @@
                 <td>${escapeHtml(movie.rank)}</td>
                 <td>
                   <div><strong><a href="${escapeHtml(movie.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(movie.title)}</a></strong></div>
-                  <div class="meta">${escapeHtml(movie.weeklyChange || "")} • ${escapeHtml(movie.daysInRelease || "")} days in release</div>
+                  <div class="meta">${escapeHtml(movie.weeklyChange || "")} - ${escapeHtml(movie.daysInRelease || "")} days in release</div>
                 </td>
                 <td>${escapeHtml(movie.gross)}</td>
                 <td>${escapeHtml(movie.theaters)}</td>
@@ -307,9 +312,9 @@
           recommendGrid.innerHTML = topRecommendations.map((movie) => `
             <div class="rec-card">
               <h3>#${escapeHtml(movie.rank)} ${escapeHtml(movie.title)}</h3>
-              <p><strong>${escapeHtml(movie.theaterOrStream)}</strong> · ${escapeHtml(movie.siskelEbertMeter)}</p>
+              <p><strong>${escapeHtml(movie.theaterOrStream)}</strong> - ${escapeHtml(movie.siskelEbertMeter)}</p>
               <p>${escapeHtml(movie.jeremyJohnsStyleNote)}</p>
-              <div class="small">Weekend gross: ${escapeHtml(movie.gross)} • Theaters: ${escapeHtml(movie.theaters)} • Total gross: ${escapeHtml(movie.totalGross)}</div>
+              <div class="small">Weekend gross: ${escapeHtml(movie.gross)} - Theaters: ${escapeHtml(movie.theaters)} - Total gross: ${escapeHtml(movie.totalGross)}</div>
             </div>
           `).join("");
         }

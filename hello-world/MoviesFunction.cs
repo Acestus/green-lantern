@@ -166,48 +166,57 @@ public sealed class MoviesFunction
         {
             new
             {
-                title = "Anora",
-                why = "Best Picture winner that is messy, funny, and sharp enough to justify the buzz.",
-                award = "2025 Oscars: Best Picture, Best Actress, Best Director, Best Original Screenplay",
-                stream = "Hulu",
-                streamUrl = "https://www.hulu.com/movie/anora-4ea682c1-f3ff-4f56-bc65-f3dd68a4af68",
-                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2025"
+                title = "One Battle after Another",
+                why = "The 2026 Best Picture winner, and the rare awards heavyweight that still sounds like a movie-night event.",
+                award = "2026 Oscars: Best Picture, Best Director, Best Film Editing, Best Adapted Screenplay",
+                stream = "HBO Max",
+                streamUrl = "https://www.hbomax.com/movies/one-battle-after-another/bebe611d-8178-481a-a4f2-de743b5b135a",
+                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2026"
             },
             new
             {
-                title = "The Brutalist",
-                why = "The kind of huge, serious movie that benefits from a room with a real sound system.",
-                award = "2025 Oscars: Best Actor, Best Original Score, Best Cinematography",
-                stream = "Max",
-                streamUrl = "https://www.hbomax.com/movies/brutalist/a56ccde9-e73e-430c-914b-b36af9482fe5",
-                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2025"
+                title = "Sinners",
+                why = "A major 2025 critical and awards movie with enough scale, music, and genre bite to justify the fuss.",
+                award = "2026 Oscars: Best Actor, Best Cinematography, Best Original Score, Best Original Screenplay",
+                stream = "HBO Max",
+                streamUrl = "https://www.hbomax.com/movies/sinners/2a072173-2bac-43ba-9933-10eba021ed96",
+                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2026"
             },
             new
             {
-                title = "Conclave",
-                why = "Papal intrigue with a clean runtime and enough tension to make it feel like a premium cable event.",
-                award = "2025 Oscars: Best Adapted Screenplay",
-                stream = "Prime Video",
-                streamUrl = "https://www.amazon.com/Conclave-Edward-Berger/dp/B0DLKMHW18",
-                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2025"
+                title = "KPop Demon Hunters",
+                why = "The animated winner with the clearest at-home rewatch value: bright, fast, musical, and easy to recommend.",
+                award = "2026 Oscars: Best Animated Feature, Best Original Song",
+                stream = "Netflix",
+                streamUrl = "https://www.netflix.com/title/81498621",
+                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2026"
             },
             new
             {
-                title = "Flow",
-                why = "A wordless animated feature that landed hard with critics and won the kind of awards people actually remember.",
-                award = "2025 Oscars: Best Animated Feature",
-                stream = "Max",
-                streamUrl = "https://www.hbomax.com/movies/flow/83df1c2b-db9d-49cd-bf83-9ddbaa7e5e30",
-                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2025"
+                title = "F1 The Movie",
+                why = "A sound-and-speed showcase that won the sound Oscar and still plays best on the biggest screen you can find.",
+                award = "2026 Oscars: Best Sound",
+                stream = "Apple TV",
+                streamUrl = "https://tv.apple.com/us/movie/f1-the-movie/umc.cmc.3t6dvnnr87zwd4wmvpdx5came",
+                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2026"
             },
             new
             {
-                title = "Dune: Part Two",
-                why = "A giant science-fiction event that still feels like the kind of thing you watch with the lights low.",
-                award = "2025 Oscars: Best Sound, Best Visual Effects",
-                stream = "Max",
-                streamUrl = "https://www.hbomax.com/movies/dune-part-two/f0a4f239-0b57-47e2-a39a-54fb96925e61",
-                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2025"
+                title = "Frankenstein",
+                why = "A lush Guillermo del Toro gothic piece that belongs in the award-season catch-up queue.",
+                award = "2026 Oscars: Best Costume Design, Best Makeup and Hairstyling, Best Production Design",
+                stream = "Netflix",
+                streamUrl = "https://www.netflix.com/title/81507921",
+                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2026"
+            },
+            new
+            {
+                title = "Marty Supreme",
+                why = "A high-wire A24 pick for people who want last year's buzzy actor-driven chaos.",
+                award = "2026 Oscars: Best Picture nominee",
+                stream = "HBO Max",
+                streamUrl = "https://www.hbomax.com/movies/marty-supreme/a78d6bab-6dd2-433d-af6e-9069f7ee0e77",
+                sourceUrl = "https://www.oscars.org/oscars/ceremonies/2026"
             }
         };
     }
