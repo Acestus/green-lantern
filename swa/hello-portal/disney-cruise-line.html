@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disney Cruise Line Guide</title>
+  <meta name="description" content="A Disney Cruise Line guide with a clear heading, TLDR, body, questions, FAQ, and schema markup.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%A2%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #122033;
+      --muted: #526070;
+      --accent: #0b5cab;
+      --accent-2: #c99a2e;
+      --card: rgba(255, 255, 255, 0.9);
+      --line: rgba(18, 32, 51, 0.13);
+      --shadow: 0 24px 60px rgba(18, 32, 51, 0.15);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(201, 154, 46, 0.2), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(11, 92, 171, 0.16), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, #eef5fb 100%);
+    }
+    .hero {
+      position: relative;
+      min-height: 44vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(9, 18, 33, 0.08), rgba(9, 18, 33, 0.74)),
+        url("./assets/images/family-cruise-sunset.png") center/cover no-repeat;
+      transform: scale(1.02);
+    }
+    .hero-inner {
+      position: relative;
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 28px;
+      color: #fff;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(2.4rem, 5vw, 4.8rem);
+      line-height: 0.96;
+      max-width: 13ch;
+    }
+    .lede {
+      max-width: 70ch;
+      font-size: 1.08rem;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.9);
+      margin: 0;
+    }
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: -34px auto 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .topbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .topbar a {
+      text-decoration: none;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(18, 32, 51, 0.08);
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+    .section {
+      padding: 28px;
+      border-top: 1px solid var(--line);
+    }
+    .section:first-child {
+      border-top: 0;
+    }
+    .label {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 800;
+    }
+    .tldr {
+      font-size: 1.08rem;
+      line-height: 1.8;
+      margin: 0;
+      color: var(--ink);
+      max-width: 78ch;
+    }
+    .body-copy {
+      display: grid;
+      gap: 14px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+    .body-copy strong {
+      color: var(--ink);
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.6rem;
+    }
+    .question-list,
+    .faq-list {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .question,
+    .faq-item {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+    }
+    .question h3,
+    .faq-item h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+    .question p,
+    .faq-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(11, 92, 171, 0.1);
+      color: var(--accent);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+    .callout {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-left: 5px solid var(--accent-2);
+      background: rgba(201, 154, 46, 0.1);
+      border-radius: 14px;
+      color: var(--ink);
+    }
+    .source-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .source-list a {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    @media (max-width: 720px) {
+      .hero-inner,
+      main {
+        width: min(100% - 20px, 1080px);
+      }
+      .section {
+        padding: 22px 18px;
+      }
+      h1 {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Disney Cruise Line · Planning Notes</div>
+      <h1>Disney Cruise Line guide</h1>
+      <p class="lede">A clean answer-first page for planning a Disney cruise: what makes the line different, how dining works, what families should prioritize, and the questions people ask before booking.</p>
+    </div>
+  </header>
+
+  <main>
+    <nav class="topbar" aria-label="Page navigation">
+      <a href="/index.html">Home</a>
+      <a href="/disney-magic-food.html">Disney Magic Food</a>
+      <a href="/data.html">Data Demo</a>
+      <a href="/observability.html">Observability</a>
+    </nav>
+
+    <article class="panel">
+      <section class="section" aria-labelledby="tldr-heading">
+        <p class="label">TLDR</p>
+        <h2 id="tldr-heading">TLDR</h2>
+        <p class="tldr">
+          Disney Cruise Line is usually best for families who want the cruise itself to feel like part of a Disney vacation: rotational dining, character moments, kids clubs, family shows, Castaway Cay or destination days, and service that keeps the trip easy without making every choice feel like homework.
+        </p>
+        <div class="chips" aria-label="Highlights">
+          <span class="chip">Rotational dining</span>
+          <span class="chip">Family entertainment</span>
+          <span class="chip">Kids clubs</span>
+          <span class="chip">Adult-only spaces</span>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="body-heading">
+        <p class="label">Body</p>
+        <h2 id="body-heading">Body</h2>
+        <div class="body-copy">
+          <p>
+            Disney Cruise Line works best when you think of the ship as the main attraction, not just transportation. The strongest itineraries give families a predictable daily rhythm: breakfast, pool or port time, character moments, dinner, and a show or deck activity before bed.
+          </p>
+          <p>
+            <strong>What makes it different:</strong> dinner rotates through themed restaurants while the same serving team follows your party, so the dining schedule changes without forcing families to solve dinner from scratch each night. Disney also lists two main dinner seating windows, with times that can shift slightly by sailing.
+          </p>
+          <p>
+            For content, the best angle is practical. Readers want to know whether Disney Cruise Line is worth the premium, which choices actually need advance planning, what is included, and how to avoid turning the vacation into a sequence of reservations and missed details.
+          </p>
+          <div class="callout">
+            <strong>Good angle for this page:</strong> answer the booking question first, then support it with dining, kids programming, entertainment, adult spaces, and the tradeoffs that matter to families.
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="questions-heading">
+        <p class="label">Questions</p>
+        <h2 id="questions-heading">Questions</h2>
+        <ul class="question-list">
+          <li class="question">
+            <h3>Is Disney Cruise Line worth it for families?</h3>
+            <p>Often yes, especially when the family values Disney entertainment, strong kids programming, themed dining, and a cruise experience that feels polished from morning to night.</p>
+          </li>
+          <li class="question">
+            <h3>What should first-time cruisers plan first?</h3>
+            <p>Start with itinerary, ship, stateroom type, dinner seating, port excursions, and any adult-exclusive dining or special activities that need reservations.</p>
+          </li>
+          <li class="question">
+            <h3>What is the best way to write about Disney Cruise Line?</h3>
+            <p>Lead with clear recommendations, then organize the details around decisions: book or skip, early or late dining, ship day or port day, included food or premium extras.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-heading">
+        <p class="label">FAQ</p>
+        <h2 id="faq-heading">FAQ</h2>
+        <ul class="faq-list">
+          <li class="faq-item">
+            <h3>What is rotational dining on Disney Cruise Line?</h3>
+            <p>It is Disney's dinner system where guests rotate through themed main dining rooms during the sailing while their serving team stays with them.</p>
+          </li>
+          <li class="faq-item">
+            <h3>Are there adult-only dining options?</h3>
+            <p>Yes. Disney Cruise Line offers premium adult-exclusive dining on its ships, and those meals generally require reservations and an added cost.</p>
+          </li>
+          <li class="faq-item">
+            <h3>What makes a Disney cruise different from a park trip?</h3>
+            <p>The trip is more self-contained. Instead of planning every park day, families get Disney service, dining, characters, entertainment, and rest time in one floating resort.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="sources-heading">
+        <p class="label">Sources</p>
+        <h2 id="sources-heading">Sources</h2>
+        <ul class="source-list">
+          <li><a href="https://disneycruise.disney.go.com/faq/dining-food-beverages/rotational-dining/">Disney Cruise Line rotational dining FAQ</a></li>
+          <li><a href="https://disneycruise.disney.go.com/faq/dining-food-beverages/dinner-times/">Disney Cruise Line dinner seating FAQ</a></li>
+          <li><a href="https://disneycruise.disney.go.com/onboard-activities/list/dining/">Disney Cruise Line dining overview</a></li>
+        </ul>
+      </section>
+    </article>
+  </main>
+
+  <script>
+    const schema = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": `${window.location.origin}${window.location.pathname}`,
+          "name": "Disney Cruise Line guide",
+          "description": "A Disney Cruise Line guide with a heading, TLDR, body, questions, FAQ, and schema markup.",
+          "about": {
+            "@type": "Thing",
+            "name": "Disney Cruise Line family cruise planning"
+          },
+          "mainEntity": {
+            "@id": `${window.location.origin}${window.location.pathname}#faq`
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": `${window.location.origin}${window.location.pathname}#faq`,
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is rotational dining on Disney Cruise Line?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "It is Disney's dinner system where guests rotate through themed main dining rooms during the sailing while their serving team stays with them."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are there adult-only dining options?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Disney Cruise Line offers premium adult-exclusive dining on its ships, and those meals generally require reservations and an added cost."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What makes a Disney cruise different from a park trip?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The trip is more self-contained. Instead of planning every park day, families get Disney service, dining, characters, entertainment, and rest time in one floating resort."
+              }
+            }
+          ]
+        }
+      ]
+    };
+
+    const ld = document.createElement("script");
+    ld.type = "application/ld+json";
+    ld.textContent = JSON.stringify(schema);
+    document.head.appendChild(ld);
+  </script>
+</body>
+</html>
