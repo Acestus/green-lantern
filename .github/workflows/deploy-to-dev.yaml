@@ -38,17 +38,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy-infra:
+  prepare:
     runs-on: ubuntu-latest
     environment: dev
     outputs:
       project: ${{ steps.cfg.outputs.project }}
       subscription_id: ${{ steps.cfg.outputs.subscription_id }}
-      resource_group: ${{ steps.infra.outputs.resource_group }}
+      resource_group: ${{ steps.cfg.outputs.resource_group }}
+      should_deploy_infra: ${{ steps.changes.outputs.should_deploy_infra }}
 
     steps:
       - name: Checkout green-lantern repo
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Resolve deployment inputs
         id: cfg
@@ -67,20 +70,62 @@ jobs:
 
           "project=$project" >> $env:GITHUB_OUTPUT
           "subscription_id=${{ env.TARGET_SUBSCRIPTION_ID }}" >> $env:GITHUB_OUTPUT
+          "resource_group=rg-$project-dev" >> $env:GITHUB_OUTPUT
+
+      - name: Detect infrastructure changes
+        id: changes
+        shell: pwsh
+        run: |
+          $shouldDeployInfra = "true"
+
+          if ("${{ github.event_name }}" -eq "push") {
+            $before = "${{ github.event.before }}"
+            $after = "${{ github.sha }}"
+            if (-not [string]::IsNullOrWhiteSpace($before) -and $before -ne "0000000000000000000000000000000000000000") {
+              $changedFiles = git diff --name-only --diff-filter=ACMRT $before $after
+              $infraChanged = $changedFiles | Where-Object { $_ -match '^infrastructure/.*\.(bicep|bicepparam)$' }
+              if (-not $infraChanged) {
+                $shouldDeployInfra = "false"
+              }
+            }
+          }
+
+          "should_deploy_infra=$shouldDeployInfra" >> $env:GITHUB_OUTPUT
+
+      - name: Publish prepare summary
+        shell: bash
+        run: |
+          {
+            echo "## Deployment preflight"
+            echo ""
+            echo "- **Project:** \`${{ steps.cfg.outputs.project }}\`"
+            echo "- **Resource group:** \`${{ steps.cfg.outputs.resource_group }}\`"
+            echo "- **Deploy infra:** \`${{ steps.changes.outputs.should_deploy_infra }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-infra:
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: prepare
+    if: needs.prepare.outputs.should_deploy_infra == 'true'
+
+    steps:
+      - name: Checkout green-lantern repo
+        uses: actions/checkout@v5
 
       - name: Azure login (OIDC)
         uses: azure/login@v3
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ steps.cfg.outputs.subscription_id }}
+          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
 
       - name: Prepare deployment parameters
         id: infra
         shell: pwsh
         run: |
-          $project = "${{ steps.cfg.outputs.project }}"
-          $resourceGroupName = "rg-$project-dev"
+          $project = "${{ needs.prepare.outputs.project }}"
+          $resourceGroupName = "${{ needs.prepare.outputs.resource_group }}"
           $paramFilePath = "infrastructure/main.dev.generated.bicepparam"
 
           @(
@@ -124,12 +169,15 @@ jobs:
           echo "   Likely causes:"
           echo "     • OIDC federated credential mismatch for environment:dev"
           echo "     • Bicep parameter mismatch for projectName/target subscription"
-          echo "     • Validate deployment: az deployment group what-if --resource-group rg-${{ steps.cfg.outputs.project }}-dev --template-file infrastructure/main.bicep --parameters ${{ steps.infra.outputs.param_file }}"
+          echo "     • Validate deployment: az deployment group what-if --resource-group ${{ needs.prepare.outputs.resource_group }} --template-file infrastructure/main.bicep --parameters ${{ steps.infra.outputs.param_file }}"
 
   upload-storage-reports:
     runs-on: ubuntu-latest
     environment: dev
-    needs: deploy-infra
+    needs:
+      - prepare
+      - deploy-infra
+    if: ${{ always() && needs.prepare.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') }}
 
     steps:
       - name: Checkout green-lantern repo
@@ -140,7 +188,7 @@ jobs:
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
 
       - name: Upload storage-hosted HTML reports
         uses: azure/CLI@v2
@@ -148,7 +196,7 @@ jobs:
           azcliversion: latest
           inlineScript: |
             set -euo pipefail
-            project="${{ needs.deploy-infra.outputs.project }}"
+            project="${{ needs.prepare.outputs.project }}"
             project_title="${project^}"
             env_name="${{ env.ENVIRONMENT }}"
             region="${{ env.REGION_CODE }}"
@@ -156,7 +204,7 @@ jobs:
             storage_account="st${project}${env_name}${region}${instance}"
             swa_name="swa-${project}-${env_name}-${region}-${instance}"
             web_container='$web'
-            rg="${{ needs.deploy-infra.outputs.resource_group }}"
+            rg="${{ needs.prepare.outputs.resource_group }}"
 
             account_key=$(az storage account keys list \
               --resource-group "$rg" \
@@ -215,7 +263,10 @@ jobs:
   sync-appinsights-key:
     runs-on: ubuntu-latest
     environment: dev
-    needs: deploy-infra
+    needs:
+      - prepare
+      - deploy-infra
+    if: ${{ always() && needs.prepare.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') }}
 
     steps:
       - name: Azure login (OIDC)
@@ -223,7 +274,7 @@ jobs:
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
 
       - name: Ensure App Insights API key and function setting
         uses: azure/CLI@v2
@@ -231,9 +282,9 @@ jobs:
           azcliversion: latest
           inlineScript: |
             set -euo pipefail
-            rg="${{ needs.deploy-infra.outputs.resource_group }}"
-            appi_name="appi-${{ needs.deploy-infra.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
-            function_name="func-${{ needs.deploy-infra.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+            rg="${{ needs.prepare.outputs.resource_group }}"
+            appi_name="appi-${{ needs.prepare.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+            function_name="func-${{ needs.prepare.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
 
             api_key=$(az functionapp config appsettings list \
               --name "$function_name" \
@@ -268,7 +319,10 @@ jobs:
   deploy-function:
     runs-on: ubuntu-latest
     environment: dev
-    needs: deploy-infra
+    needs:
+      - prepare
+      - deploy-infra
+    if: ${{ always() && needs.prepare.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') }}
     outputs:
       function_hostname: ${{ steps.function-host.outputs.hostname }}
 
@@ -291,12 +345,12 @@ jobs:
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
 
       - name: Deploy Hello World code
         uses: Azure/functions-action@v1
         with:
-          app-name: func-${{ needs.deploy-infra.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}
+          app-name: func-${{ needs.prepare.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}
           package: ./hello-world/publish
 
       - name: Resolve function hostname
@@ -307,15 +361,18 @@ jobs:
           inlineScript: |
             set -euo pipefail
             HOSTNAME=$(az functionapp show \
-              --name "func-${{ needs.deploy-infra.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
-              --resource-group "${{ needs.deploy-infra.outputs.resource_group }}" \
+              --name "func-${{ needs.prepare.outputs.project }}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
+              --resource-group "${{ needs.prepare.outputs.resource_group }}" \
               --query defaultHostName -o tsv)
             echo "hostname=$HOSTNAME" >> "$GITHUB_OUTPUT"
 
   deploy-swa:
     runs-on: ubuntu-latest
     environment: dev
-    needs: deploy-infra
+    needs:
+      - prepare
+      - deploy-infra
+    if: ${{ always() && needs.prepare.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') }}
     outputs:
       swa_hostname: ${{ steps.swa-host.outputs.hostname }}
 
@@ -328,14 +385,14 @@ jobs:
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
 
       - name: Write SWA runtime config
         shell: pwsh
         run: |
-          $project = "${{ needs.deploy-infra.outputs.project }}"
+          $project = "${{ needs.prepare.outputs.project }}"
           $storageAccount = "st${project}${{ env.ENVIRONMENT }}${{ env.REGION_CODE }}${{ env.INSTANCE_NUMBER }}"
-          $resourceGroup = "${{ needs.deploy-infra.outputs.resource_group }}"
+          $resourceGroup = "${{ needs.prepare.outputs.resource_group }}"
           $apiBaseUrl = "https://func-${project}-hello-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}.azurewebsites.net/api"
           $storageWebBaseUrl = (az storage account show --name $storageAccount --resource-group $resourceGroup --query "primaryEndpoints.web" -o tsv).TrimEnd('/')
           $swaName = "swa-${project}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
@@ -358,10 +415,10 @@ jobs:
           azcliversion: latest
           inlineScript: |
             set -euo pipefail
-            swa_name="swa-${{ needs.deploy-infra.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
+            swa_name="swa-${{ needs.prepare.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}"
             token=$(az staticwebapp secrets list \
               --name "$swa_name" \
-              --resource-group "${{ needs.deploy-infra.outputs.resource_group }}" \
+              --resource-group "${{ needs.prepare.outputs.resource_group }}" \
               --query properties.apiKey -o tsv)
 
             if [ -z "$token" ]; then
@@ -370,7 +427,7 @@ jobs:
               echo "     • Static Web App was not created in this deployment" >&2
               echo "     • Resource group or subscription does not match deployment target" >&2
               echo "   Try:" >&2
-              echo "     • az staticwebapp list --resource-group \"${{ needs.deploy-infra.outputs.resource_group }}\" -o table" >&2
+              echo "     • az staticwebapp list --resource-group \"${{ needs.prepare.outputs.resource_group }}\" -o table" >&2
               exit 1
             fi
 
@@ -406,8 +463,8 @@ jobs:
           inlineScript: |
             set -euo pipefail
             HOSTNAME=$(az staticwebapp show \
-              --name "swa-${{ needs.deploy-infra.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
-              --resource-group "${{ needs.deploy-infra.outputs.resource_group }}" \
+              --name "swa-${{ needs.prepare.outputs.project }}-${{ env.ENVIRONMENT }}-${{ env.REGION_CODE }}-${{ env.INSTANCE_NUMBER }}" \
+              --resource-group "${{ needs.prepare.outputs.resource_group }}" \
               --query defaultHostname -o tsv)
             echo "hostname=$HOSTNAME" >> "$GITHUB_OUTPUT"
 
@@ -415,11 +472,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     needs:
+      - prepare
       - deploy-infra
       - deploy-function
       - deploy-swa
       - upload-storage-reports
       - sync-appinsights-key
+    if: ${{ always() && needs.prepare.result == 'success' && needs.deploy-function.result == 'success' && needs.deploy-swa.result == 'success' && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') && (needs.upload-storage-reports.result == 'success' || needs.upload-storage-reports.result == 'skipped') && (needs.sync-appinsights-key.result == 'success' || needs.sync-appinsights-key.result == 'skipped') }}
 
     steps:
       - name: Smoke test function health endpoint
@@ -469,14 +528,14 @@ jobs:
         with:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
-          subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
+          subscription-id: ${{ needs.prepare.outputs.subscription_id }}
 
       - name: Publish deployment summary
         shell: bash
         run: |
           set -euo pipefail
-          rg="${{ needs.deploy-infra.outputs.resource_group }}"
-          project="${{ needs.deploy-infra.outputs.project }}"
+          rg="${{ needs.prepare.outputs.resource_group }}"
+          project="${{ needs.prepare.outputs.project }}"
           storage_account="st${project}${{ env.ENVIRONMENT }}${{ env.REGION_CODE }}${{ env.INSTANCE_NUMBER }}"
           function_hostname="${{ needs.deploy-function.outputs.function_hostname }}"
           swa_hostname="${{ needs.deploy-swa.outputs.swa_hostname }}"
