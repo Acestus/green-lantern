@@ -138,7 +138,7 @@ jobs:
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Upload storage-hosted HTML reports
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           azcliversion: latest
           inlineScript: |
@@ -221,7 +221,7 @@ jobs:
           subscription-id: ${{ needs.deploy-infra.outputs.subscription_id }}
 
       - name: Ensure App Insights API key and function setting
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           azcliversion: latest
           inlineScript: |
@@ -296,7 +296,7 @@ jobs:
 
       - name: Resolve function hostname
         id: function-host
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           azcliversion: latest
           inlineScript: |
@@ -348,7 +348,7 @@ jobs:
 
       - name: Get SWA deployment token
         id: swa-token
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           azcliversion: latest
           inlineScript: |
@@ -395,7 +395,7 @@ jobs:
 
       - name: Resolve SWA hostname
         id: swa-host
-        uses: azure/CLI@v2
+        uses: azure/CLI@v3
         with:
           azcliversion: latest
           inlineScript: |
