@@ -443,6 +443,25 @@ jobs:
           echo "❌ Function smoke test failed at $URL"
           exit 1
 
+      - name: Smoke test movie overview API
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://${{ needs.deploy-function.outputs.function_hostname }}/api/movies/overview"
+          ATTEMPTS=12
+          DELAY=10
+          for i in $(seq 1 $ATTEMPTS); do
+            CODE=$(curl -s -o /tmp/movies-overview.json -w "%{http_code}" "$URL")
+            if [ "$CODE" = "200" ] && grep -Eiq '"currentMovies"[[:space:]]*:' /tmp/movies-overview.json; then
+              echo "✅ Movie overview API smoke test passed."
+              exit 0
+            fi
+            echo "Waiting for movie overview API (${i}/${ATTEMPTS}), last status=$CODE..."
+            sleep "$DELAY"
+          done
+          echo "❌ Movie overview API smoke test failed at $URL"
+          exit 1
+
       - name: Smoke test SWA endpoint
         shell: bash
         run: |

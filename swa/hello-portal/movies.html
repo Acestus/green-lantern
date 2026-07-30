@@ -256,6 +256,34 @@
       }[char]));
     }
 
+    async function fetchMovieOverview() {
+      const cfg = window.HELLO_PORTAL_CONFIG || {};
+      const apiCandidates = [
+        cfg.apiBaseUrl,
+        "https://func-lantern-hello-dev-usw2-001.azurewebsites.net/api",
+        "/api"
+      ].filter(Boolean);
+
+      let lastError = null;
+      for (const apiBase of apiCandidates) {
+        try {
+          const response = await fetch(`${apiBase.replace(/\/$/, "")}/movies/overview`);
+          if (response.ok) {
+            return {
+              data: await response.json(),
+              apiBase
+            };
+          }
+
+          lastError = new Error(`${apiBase} returned HTTP ${response.status}`);
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      throw lastError || new Error("No movie API endpoint configured.");
+    }
+
     async function loadMovies() {
       const currentRows = document.getElementById("currentRows");
       const lastYearRows = document.getElementById("lastYearRows");
@@ -264,17 +292,10 @@
       const currentError = document.getElementById("currentError");
 
       try {
-        const cfg = window.HELLO_PORTAL_CONFIG || {};
-        const apiBase = cfg.apiBaseUrl || "/api";
-        const response = await fetch(`${apiBase}/movies/overview`);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
+        const { data, apiBase } = await fetchMovieOverview();
         const source = data.source || {};
 
-        chartMeta.textContent = `${source.name || "Source"}: ${source.chartDate || "latest weekend"} - Updated ${data.generatedAtUtc || "just now"}`;
+        chartMeta.textContent = `${source.name || "Source"}: ${source.chartDate || "latest weekend"} - Updated ${data.generatedAtUtc || "just now"} - API ${apiBase}`;
 
         const currentMovies = data.currentMovies || [];
         if (currentMovies.length === 0) {
