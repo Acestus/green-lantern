@@ -32,7 +32,7 @@ var functionPlanName = 'plan-${projectName}-${environment}-${region}-${instanceN
 var helloFunctionName = 'func-${projectName}-hello-${environment}-${region}-${instanceNumber}'
 var appInsightsName = 'appi-${projectName}-${environment}-${region}-${instanceNumber}'
 var deploymentContainerName = 'function-deployments'
-var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6f-f1e8-4753-8033-0f276bb0955c'
+var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
 var storageQueueDataContributorRoleDefinitionId = '974c5e8b-45b9-4653-ba55-5f855dd0fb88'
 var storageTableDataContributorRoleDefinitionId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3'
 
