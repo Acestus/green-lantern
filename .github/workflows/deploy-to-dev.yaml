@@ -83,7 +83,10 @@ jobs:
             $after = "${{ github.sha }}"
             if (-not [string]::IsNullOrWhiteSpace($before) -and $before -ne "0000000000000000000000000000000000000000") {
               $changedFiles = git diff --name-only --diff-filter=ACMRT $before $after
-              $infraChanged = $changedFiles | Where-Object { $_ -match '^infrastructure/.*\.(bicep|bicepparam)$' }
+              $infraChanged = $changedFiles | Where-Object {
+                $_ -match '^infrastructure/.*\.(bicep|bicepparam)$' -or
+                $_ -eq '.github/workflows/deploy-to-dev.yaml'
+              }
               if (-not $infraChanged) {
                 $shouldDeployInfra = "false"
               }
