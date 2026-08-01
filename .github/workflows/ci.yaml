@@ -113,7 +113,7 @@ jobs:
           test -f staticwebapp.config.json
           test -f assets/data.js
           test -f assets/observability.js
-          rg --files -g '*.html' | sort
+          find . -name '*.html' -type f | sort
 
       - name: Upload SWA artifact
         uses: actions/upload-artifact@v4
