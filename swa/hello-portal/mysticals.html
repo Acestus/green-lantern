@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mysticals Concept Studio</title>
+  <meta name="description" content="Static brainstorming concepts for Mysticals content formats: listicle travel guide, Theater of the Mind, FAQ, and subject lanes.">
+  <style>
+    :root {
+      --ink: #202522;
+      --muted: #626c66;
+      --paper: #f7f2e8;
+      --panel: #fffdf8;
+      --line: #dfd4c0;
+      --green: #1f6b4d;
+      --teal: #175a63;
+      --wine: #8a3f4d;
+      --gold: #c28a33;
+      --blue: #345d8c;
+      --shadow: 0 18px 38px rgba(42, 40, 33, 0.13);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    a { color: inherit; }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255, 253, 248, 0.96);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner,
+    .hero-inner,
+    main {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .nav-inner {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--green);
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, transparent 45%, rgba(255,255,255,0.65) 45% 55%, transparent 55%),
+        linear-gradient(135deg, var(--green), var(--gold));
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .links a {
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: var(--teal);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .links a:hover { background: #e9efe9; }
+    .hero {
+      min-height: 540px;
+      display: grid;
+      align-items: end;
+      position: relative;
+      background: #18372e;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(21,35,31,0.92), rgba(21,35,31,0.62) 52%, rgba(21,35,31,0.12)),
+        url("./assets/images/mysticals-hero.png") center/cover no-repeat;
+    }
+    .hero-inner {
+      position: relative;
+      color: #fff;
+      padding: 82px 0 58px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,0.28);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.14);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    h1 {
+      max-width: 780px;
+      margin: 14px 0 16px;
+      font-size: clamp(3rem, 7vw, 5.4rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+    .lede {
+      max-width: 760px;
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+    main { padding: 34px 0 74px; }
+    .concept-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: -76px 0 34px;
+      position: relative;
+      z-index: 2;
+    }
+    .concept,
+    .subject,
+    .panel,
+    details {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+    .concept { padding: 18px; min-height: 172px; }
+    .concept strong,
+    .subject strong {
+      display: block;
+      color: var(--green);
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+    .concept p,
+    .subject p,
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin: 28px 0 14px;
+    }
+    h2 {
+      margin: 0;
+      color: var(--teal);
+      font-size: 2.1rem;
+      line-height: 1.05;
+    }
+    .note {
+      max-width: 690px;
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .subject {
+      padding: 16px;
+      min-height: 192px;
+      border-top: 5px solid var(--green);
+    }
+    .subject:nth-child(2n) { border-top-color: var(--wine); }
+    .subject:nth-child(3n) { border-top-color: var(--gold); }
+    .subject:nth-child(4n) { border-top-color: var(--blue); }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .tag {
+      border: 1px solid #ded3bf;
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: #47524b;
+      background: #fbf7ee;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .panel { padding: 18px; }
+    .route-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .route {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+    .num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--teal);
+      font-weight: 900;
+    }
+    .route h3 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+      color: var(--ink);
+    }
+    .scene {
+      min-height: 320px;
+      color: #fff;
+      background:
+        linear-gradient(160deg, rgba(23,90,99,0.92), rgba(31,107,77,0.82)),
+        url("./assets/images/mysticals-hero.png") center/cover no-repeat;
+      display: grid;
+      align-content: end;
+    }
+    .scene p { color: rgba(255,255,255,0.9); }
+    details {
+      padding: 15px 16px;
+      box-shadow: none;
+    }
+    details + details { margin-top: 10px; }
+    summary {
+      cursor: pointer;
+      color: var(--green);
+      font-weight: 900;
+    }
+    details p { margin: 10px 0 0; color: var(--muted); line-height: 1.55; }
+    @media (max-width: 900px) {
+      .concept-strip,
+      .subject-grid,
+      .two-col { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .hero { min-height: 500px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/index.html"><span class="mark"></span><span>Mysticals</span></a>
+      <div class="links">
+        <a href="#subjects">Subjects</a>
+        <a href="#listicle">Listicle</a>
+        <a href="#theater">Theater</a>
+        <a href="#faq">FAQ</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">Static brainstorm</span>
+      <h1>Mysticals Content Experiments</h1>
+      <p class="lede">A quick visual pass at what the Mysticals idea could feel like: practical guides, imaginative scene-setting, and answer-first pages across the subjects Acestus keeps returning to.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="concept-strip" aria-label="Concept formats">
+      <article class="concept">
+        <strong>Listicle Travel Guide</strong>
+        <p>Fast-scanning routes through a subject: what to try first, what to skip, what to save for later, and where the rabbit trails begin.</p>
+      </article>
+      <article class="concept">
+        <strong>Theater of the Mind</strong>
+        <p>A more immersive treatment that teaches by placing the reader inside a scene, then giving them handles for memory and action.</p>
+      </article>
+      <article class="concept">
+        <strong>FAQ</strong>
+        <p>Answer-first pages for practical search intent: short answers up top, nuance beneath, and clear next steps for the curious reader.</p>
+      </article>
+    </section>
+
+    <section id="subjects">
+      <div class="section-head">
+        <div>
+          <h2>Subject Lanes</h2>
+          <p class="note">Eight early lanes for the Mysticals world. These are intentionally rough, written as conversation starters instead of finished brand copy.</p>
+        </div>
+      </div>
+      <div class="subject-grid">
+        <article class="subject">
+          <strong>Music and Campfire Craft</strong>
+          <p>Celtic band energy, Jim Basil-style guitar notes, harmonicas, ocarinas, National Geographic travel curiosity, and Cub Scouting nights outside.</p>
+          <div class="tag-row"><span class="tag">Celtic</span><span class="tag">Guitar</span><span class="tag">Camping</span></div>
+        </article>
+        <article class="subject">
+          <strong>Campaign</strong>
+          <p>Messaging, persuasion, field notes, practical strategy, and the human texture behind civic or cause-driven work.</p>
+          <div class="tag-row"><span class="tag">Messaging</span><span class="tag">Field notes</span></div>
+        </article>
+        <article class="subject">
+          <strong>Homeschool Mental Gymnastics</strong>
+          <p>Mental math, memory work, Aristotelian teaching, reading, writing, arithmetic, a mental abacus, slide-rule thinking, and real math in the head.</p>
+          <div class="tag-row"><span class="tag">Memory</span><span class="tag">Abacus</span><span class="tag">RWA</span></div>
+        </article>
+        <article class="subject">
+          <strong>History</strong>
+          <p>Travel-guide style entries for eras, places, maps, primary sources, and the decisions that shaped what came next.</p>
+          <div class="tag-row"><span class="tag">Maps</span><span class="tag">Sources</span></div>
+        </article>
+        <article class="subject">
+          <strong>Christianity</strong>
+          <p>A lean missionary life: letting go, pruning clutter, focusing on what matters, and being ready to serve.</p>
+          <div class="tag-row"><span class="tag">Detachment</span><span class="tag">Mission</span></div>
+        </article>
+        <article class="subject">
+          <strong>Cloud Computing</strong>
+          <p>Architecture patterns, SRE instincts, deployment tradeoffs, Azure lessons, and practical guides for making systems observable.</p>
+          <div class="tag-row"><span class="tag">Azure</span><span class="tag">SRE</span></div>
+        </article>
+        <article class="subject">
+          <strong>Disney</strong>
+          <p>Disney travel, Disney Food Blog-style planning, Disney Cruise Line, D23/member notes, replay/watchlists, Laura and Connor references, and movie nights.</p>
+          <div class="tag-row"><span class="tag">Food</span><span class="tag">Cruise</span><span class="tag">Movies</span></div>
+        </article>
+        <article class="subject">
+          <strong>Assess the Data</strong>
+          <p>Investor-grade information for real estate, movies, stocks, and other choices: clear data, useful comparisons, and enough context to decide.</p>
+          <div class="tag-row"><span class="tag">Investing</span><span class="tag">Real estate</span><span class="tag">Signals</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="listicle">
+      <div class="section-head">
+        <div>
+          <h2>Listicle Travel Guide Sample</h2>
+          <p class="note">A travel-guide treatment turns each topic into a route: a starting point, a landmark, and a practical next step.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="route-list">
+          <div class="route"><span class="num">1</span><div><h3>Start with a doorway</h3><p>Give the reader one vivid scene or decision, then make the subject feel navigable.</p></div></div>
+          <div class="route"><span class="num">2</span><div><h3>Offer seven quick stops</h3><p>Music, campaign, homeschool, history, Christianity, cloud computing, Disney, plus Assess the Data when the page needs a decision framework.</p></div></div>
+          <div class="route"><span class="num">3</span><div><h3>End with what to do next</h3><p>A playlist, family movie night, lesson drill, source packet, prayer rule, architecture checklist, or investment comparison table.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="theater">
+      <div class="section-head">
+        <div>
+          <h2>Theater of the Mind Sample</h2>
+          <p class="note">This version is more narrative. It teaches by asking the reader to imagine the work before naming the concepts.</p>
+        </div>
+      </div>
+      <div class="two-col">
+        <article class="panel scene">
+          <h2>Picture the table.</h2>
+          <p>A map, a notebook, a small instrument, a stack of source cards, and a family plan for what to learn next. Mysticals can make each subject feel like a room worth entering.</p>
+        </article>
+        <article class="panel">
+          <h2>How It Works</h2>
+          <p>The page starts with an image in the reader's head, then turns that image into a practical model: what matters, what can be ignored, and what action follows.</p>
+          <div class="tag-row"><span class="tag">Memory hook</span><span class="tag">Decision path</span><span class="tag">Next action</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="section-head">
+        <div>
+          <h2>FAQ Sample</h2>
+          <p class="note">Short, searchable answers with enough depth to be genuinely useful.</p>
+        </div>
+      </div>
+      <details open>
+        <summary>What is Mysticals?</summary>
+        <p>A family of practical, imaginative guides for subjects Acestus cares about: learning, faith, travel, technology, culture, and decision data.</p>
+      </details>
+      <details>
+        <summary>What does Assess the Data do?</summary>
+        <p>It gathers the facts and signals an investor needs before choosing: comparable properties, movie performance, public market indicators, risks, assumptions, and plain-language takeaways.</p>
+      </details>
+      <details>
+        <summary>How should the pages feel?</summary>
+        <p>Useful first, warm second, and never bloated. The best pages should be easy to skim but still leave the reader with a sharper mental model.</p>
+      </details>
+    </section>
+  </main>
+</body>
+</html>

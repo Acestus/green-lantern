@@ -3,10 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "bun build ./src/data.js ./src/observability.js --outdir ./assets --target browser --format esm --minify"
+    "build": "bun build ./src/data.ts ./src/observability.ts --outdir ./assets --target browser --format esm --minify",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "chart.js": "^4.4.3"
   }
 }
-

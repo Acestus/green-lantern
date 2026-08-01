@@ -13,7 +13,7 @@ function parseDateOrNull(value) {
 }
 
 function renderCountsChart(data) {
-  const ctx = document.getElementById("storageCountsChart");
+  const ctx = document.getElementById("storageCountsChart") as HTMLCanvasElement | null;
   if (!ctx) {
     return;
   }
@@ -48,7 +48,7 @@ function renderCountsChart(data) {
 }
 
 function renderFreshnessChart(data) {
-  const ctx = document.getElementById("storageFreshnessChart");
+  const ctx = document.getElementById("storageFreshnessChart") as HTMLCanvasElement | null;
   if (!ctx) {
     return;
   }
@@ -156,4 +156,3 @@ async function loadStorageSummary() {
 }
 
 loadStorageSummary();
-

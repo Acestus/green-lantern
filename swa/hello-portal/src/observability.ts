@@ -71,8 +71,8 @@ function initSwaTelemetry() {
 }
 
 function renderTrendCharts(points) {
-  const trendCanvas = document.getElementById("appInsightsTrendChart");
-  const latencyCanvas = document.getElementById("appInsightsLatencyChart");
+  const trendCanvas = document.getElementById("appInsightsTrendChart") as HTMLCanvasElement | null;
+  const latencyCanvas = document.getElementById("appInsightsLatencyChart") as HTMLCanvasElement | null;
   if (!trendCanvas || !latencyCanvas) {
     return;
   }

@@ -219,6 +219,18 @@ This template follows the Cloud Adoption Framework (CAF) naming conventions:
 
 ## CI/CD
 
+### CI quality gate
+
+The `CI` workflow (`.github/workflows/ci.yaml`) runs on pull requests, pushes to
+`main`, and manual dispatch. It validates the deployable pieces before the
+environment workflows publish anything:
+
+1. Compiles `infrastructure/main.bicep`
+2. Restores, builds, tests, and publishes the Azure Functions app
+3. Typechecks the Static Web App's vanilla TypeScript sources
+4. Builds the browser assets that land in `swa/hello-portal/assets/`
+5. Uploads compiled Bicep, Function, test result, and SWA artifacts
+
 ### One-click bootstrap (copy repo and run)
 
 Use one of the two manual button workflows:
