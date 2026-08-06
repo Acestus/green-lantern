@@ -28,6 +28,7 @@ env:
   TARGET_SUBSCRIPTION_ID: df64929f-810d-4176-8097-35cd05cae10d
   TARGET_SUBSCRIPTION_NAME: acestus
   SWA_APP_LOCATION: swa/hello-portal
+  SWA_OUTPUT_LOCATION: swa/hello-portal/public
 
 concurrency:
   group: green-lantern-prd-${{ github.ref_name }}
@@ -291,7 +292,7 @@ jobs:
             "  storageWebBaseUrl: '$storageWebBaseUrl',"
             "  swaBaseUrl: '$swaBaseUrl'"
             "};"
-          ) | Set-Content -Path "${{ env.SWA_APP_LOCATION }}/config.js" -Encoding utf8
+          ) | Set-Content -Path "${{ env.SWA_APP_LOCATION }}/static/config.js" -Encoding utf8
 
       - name: Get SWA deployment token
         id: swa-token
@@ -324,7 +325,60 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Build SWA assets (Bun + Chart.js)
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.164.0"
+          extended: true
+
+      - name: Setup Java for PlantUML
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Render PlantUML diagrams
+        shell: bash
+        run: scripts/render-plantuml-changed.sh "${{ env.SWA_APP_LOCATION }}"
+
+      - name: Upload rendered diagrams to storage static website
+        shell: bash
+        run: |
+          set -euo pipefail
+          project="${{ needs.deploy-infra.outputs.project }}"
+          storage_account="st${project}${{ env.ENVIRONMENT }}${{ env.REGION_CODE }}${{ env.INSTANCE_NUMBER }}"
+          web_container='$web'
+          rg="${{ needs.deploy-infra.outputs.resource_group }}"
+
+          account_key=$(az storage account keys list \
+            --resource-group "$rg" \
+            --account-name "$storage_account" \
+            --query "[0].value" -o tsv)
+
+          az storage blob service-properties update \
+            --account-name "$storage_account" \
+            --account-key "$account_key" \
+            --static-website \
+            --index-document index.html \
+            --404-document architecture-report.html \
+            --output none
+
+          az storage container create \
+            --name "$web_container" \
+            --account-name "$storage_account" \
+            --account-key "$account_key" \
+            --output none
+
+          az storage blob upload-batch \
+            --account-name "$storage_account" \
+            --account-key "$account_key" \
+            --destination "$web_container" \
+            --destination-path diagrams \
+            --source "${{ env.SWA_APP_LOCATION }}/static/diagrams" \
+            --overwrite true \
+            --output table
+
+      - name: Build SWA site (Bun + Hugo)
         shell: bash
         working-directory: ${{ env.SWA_APP_LOCATION }}
         run: |
@@ -337,7 +391,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
-          app_location: ${{ env.SWA_APP_LOCATION }}
+          app_location: ${{ env.SWA_OUTPUT_LOCATION }}
           skip_app_build: true
 
       - name: Resolve SWA hostname

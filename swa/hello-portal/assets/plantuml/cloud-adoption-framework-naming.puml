@@ -1,0 +1,57 @@
+@startuml
+!theme plain
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #ffffff
+  BorderColor #8a8886
+  RoundCorner 8
+}
+skinparam note {
+  BackgroundColor #f3f2f1
+  BorderColor #c8c6c4
+}
+skinparam ArrowColor #0078d4
+skinparam defaultFontName "Segoe UI"
+
+title Cloud Adoption Framework naming flow
+
+rectangle "Naming inputs" as inputs {
+  rectangle "Workload\nlantrnfx" as workload
+  rectangle "Environment\ndev | prd" as env
+  rectangle "Region\nusw2" as region
+  rectangle "Instance\n001" as instance
+}
+
+rectangle "Shared CAF suffix" as suffix {
+  rectangle "<project>-<env>-<region>-<instance>\nlantrnfx-dev-usw2-001" as caf
+}
+
+rectangle "Azure resources" as resources {
+  rectangle "Resource group\nrg-lantrnfx-dev" as rg
+  rectangle "Static Web App\nswa-lantrnfx-dev-usw2-001" as swa
+  rectangle "Function App\nfunc-lantrnfx-hello-dev-usw2-001" as func
+  rectangle "Storage account\nstlantrnfxdevusw2001" as st
+  rectangle "Key Vault\nkv-lantrnfx-dev-usw2-001" as kv
+}
+
+workload --> caf
+env --> caf
+region --> caf
+instance --> caf
+caf --> rg
+caf --> swa
+caf --> func
+caf --> st
+caf --> kv
+
+note right of st
+Storage accounts remove hyphens
+and must stay globally unique.
+end note
+
+note bottom of rg
+Resource groups keep the short
+project + environment form for scanning.
+end note
+@enduml

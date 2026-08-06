@@ -1,0 +1,8 @@
+baseURL = "/"
+locale = "en-us"
+title = "Green Lantern Portal"
+
+disableKinds = ["home", "section", "taxonomy", "term", "RSS", "sitemap", "robotsTXT"]
+
+[build]
+  writeStats = false

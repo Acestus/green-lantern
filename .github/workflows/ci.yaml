@@ -12,6 +12,7 @@ permissions:
 
 env:
   SWA_APP_LOCATION: swa/hello-portal
+  SWA_OUTPUT_LOCATION: swa/hello-portal/public
 
 jobs:
   bicep:
@@ -93,6 +94,18 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.164.0"
+          extended: true
+
+      - name: Setup Java for PlantUML
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Install dependencies
         working-directory: ${{ env.SWA_APP_LOCATION }}
         run: bun install --frozen-lockfile
@@ -101,25 +114,30 @@ jobs:
         working-directory: ${{ env.SWA_APP_LOCATION }}
         run: bun run typecheck
 
-      - name: Build browser assets
+      - name: Render PlantUML diagrams
+        run: scripts/render-plantuml-changed.sh "${{ env.SWA_APP_LOCATION }}"
+
+      - name: Build Hugo static web app
         working-directory: ${{ env.SWA_APP_LOCATION }}
         run: bun run build
 
-      - name: Check static site files
-        working-directory: ${{ env.SWA_APP_LOCATION }}
+      - name: Check generated static site files
+        working-directory: ${{ env.SWA_OUTPUT_LOCATION }}
         run: |
           set -euo pipefail
           test -f index.html
           test -f staticwebapp.config.json
           test -f assets/data.js
           test -f assets/observability.js
+          test -f diagrams/cloud-adoption-framework-naming.png
+          test -f hugo/cloud-adoption-framework-naming/index.html
           find . -name '*.html' -type f | sort
 
       - name: Upload SWA artifact
         uses: actions/upload-artifact@v4
         with:
           name: static-web-app
-          path: ${{ env.SWA_APP_LOCATION }}
+          path: ${{ env.SWA_OUTPUT_LOCATION }}
 
   deployment-readiness:
     name: Deployment readiness

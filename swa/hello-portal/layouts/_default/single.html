@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ .Title }} | {{ .Site.Title }}</title>
+  {{- with .Description }}
+  <meta name="description" content="{{ . }}">
+  {{- end }}
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #252423;
+      --muted: #605e5c;
+      --line: #d2d0ce;
+      --accent: #0078d4;
+      --accent-dark: #005a9e;
+      --soft: #eef6fc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.58;
+    }
+
+    .gl-shell {
+      min-height: 100vh;
+    }
+
+    .gl-topbar {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .gl-topbar-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .gl-brand {
+      font-weight: 700;
+      color: var(--accent-dark);
+      text-decoration: none;
+    }
+
+    .gl-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .gl-nav a {
+      color: var(--accent-dark);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .gl-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 24px 48px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 28px;
+    }
+
+    .gl-article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .gl-kicker {
+      margin: 0 0 8px;
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(32px, 4vw, 46px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .gl-description {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .gl-content h2 {
+      margin-top: 34px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line);
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .gl-content h3 {
+      margin-top: 26px;
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    .gl-content a {
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    .gl-content code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #f3f2f1;
+      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .gl-content pre {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #201f1e;
+      color: #ffffff;
+    }
+
+    .gl-content pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    .gl-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 15px;
+    }
+
+    .gl-content th,
+    .gl-content td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .gl-content th {
+      background: var(--soft);
+    }
+
+    .gl-diagram {
+      margin: 24px 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 16px;
+    }
+
+    .gl-diagram img {
+      width: 100%;
+      max-height: 620px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .gl-diagram figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .gl-sidebar {
+      align-self: start;
+      position: sticky;
+      top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .gl-sidebar strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink);
+    }
+
+    .gl-sidebar a {
+      color: var(--accent-dark);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    @media (max-width: 900px) {
+      .gl-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .gl-sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .gl-topbar-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .gl-wrap {
+        padding: 18px 14px 32px;
+      }
+
+      .gl-article {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="gl-shell">
+    <header class="gl-topbar">
+      <div class="gl-topbar-inner">
+        <a class="gl-brand" href="/index.html">Green Lantern Portal</a>
+        <nav class="gl-nav" aria-label="Primary">
+          <a href="/storage-reports.html">Storage reports</a>
+          <a href="/hugo/cloud-adoption-framework-naming/">CAF naming</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="gl-wrap">
+      <article class="gl-article">
+        <p class="gl-kicker">Hugo article</p>
+        <h1>{{ .Title }}</h1>
+        {{- with .Description }}
+        <p class="gl-description">{{ . }}</p>
+        {{- end }}
+        <div class="gl-content">
+          {{ .Content }}
+        </div>
+      </article>
+
+      <aside class="gl-sidebar">
+        <strong>Rendered by Hugo</strong>
+        <p>This page is Markdown content in the Static Web App. Its diagram comes from PlantUML rendered in CI/CD and published as a storage-hosted PNG.</p>
+        <a href="/hugo/cloud-adoption-framework-naming/">Article permalink</a>
+      </aside>
+    </main>
+  </div>
+
+  <script src="/config.js"></script>
+  <script>
+    (function hydrateStorageDiagrams() {
+      const cfg = window.HELLO_PORTAL_CONFIG || {};
+      const baseUrl = (cfg.storageWebBaseUrl || "").replace(/\/$/, "");
+      document.querySelectorAll("img[data-storage-path]").forEach((img) => {
+        const path = img.getAttribute("data-storage-path") || "";
+        if (baseUrl && path) {
+          img.src = `${baseUrl}${path.startsWith("/") ? "" : "/"}${path}`;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

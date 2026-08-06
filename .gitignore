@@ -6,6 +6,9 @@ x86/
 [Bb]in/
 [Oo]bj/
 publish/
+public/
+.hugo_build.lock
+node_modules/
 
 # NuGet
 *.nupkg

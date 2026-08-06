@@ -1,0 +1,17 @@
+{{- $path := .Get "path" | default (.Get "src") | default (.Get 0) -}}
+{{- $alt := .Get "alt" | default "Diagram" -}}
+{{- $caption := .Get "caption" -}}
+{{- if not $path -}}
+  {{- errorf "storage-diagram shortcode requires a path value" -}}
+{{- end -}}
+<figure class="gl-diagram">
+  <img
+    src="{{ $path | relURL }}"
+    data-storage-path="{{ $path }}"
+    alt="{{ $alt }}"
+    loading="lazy"
+  />
+  {{- with $caption }}
+    <figcaption>{{ . | markdownify }}</figcaption>
+  {{- end }}
+</figure>

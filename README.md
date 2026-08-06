@@ -165,6 +165,7 @@ az policy remediation create \
 - [Azure Functions Core Tools v4](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local)
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - [Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps)
+- [Hugo extended](https://gohugo.io/installation/) (for building the Static Web App)
 - [Bun](https://bun.sh/) (for bundling SWA Chart.js assets)
 
 ## Local Development
@@ -183,6 +184,20 @@ az policy remediation create \
    ```bash
    func start
    ```
+
+### Static Web App
+
+The Static Web App under `swa/hello-portal` is built with Hugo. Existing portal
+pages live under `swa/hello-portal/static` so their published routes stay stable,
+while Bun still bundles the TypeScript dashboard assets before Hugo emits the
+deployable `public` directory.
+
+```bash
+cd swa/hello-portal
+bun install
+bun run typecheck
+bun run build
+```
 
 ## Deployment
 
