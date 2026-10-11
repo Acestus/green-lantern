@@ -27,9 +27,12 @@ changed_file="$(mktemp)"
 selected_file="$(mktemp)"
 trap 'rm -f "$changed_file" "$selected_file"' EXIT
 
-git diff --name-only --diff-filter=ACMRT HEAD^ HEAD -- "$source_dir" 2>/dev/null |
+# GitHub Actions normally uses a shallow checkout, so HEAD^ may not exist.
+# A missing parent is not an error for this helper; the missing-output scan below
+# still renders any diagram that is not already present.
+(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD -- "$source_dir" 2>/dev/null || true) |
   awk '/\.puml$/' > "$changed_file"
-git diff --name-only --diff-filter=ACMRT HEAD -- "$source_dir" 2>/dev/null |
+(git diff --name-only --diff-filter=ACMRT HEAD -- "$source_dir" 2>/dev/null || true) |
   awk '/\.puml$/' >> "$changed_file"
 
 cat "$changed_file" > "$selected_file"
